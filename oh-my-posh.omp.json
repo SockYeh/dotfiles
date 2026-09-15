@@ -1,0 +1,95 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": "┌──(",
+          "type": "text"
+        },
+        {
+          "foreground": "#89b4fa",
+          "style": "plain",
+          "template": "{{ .UserName }}@{{ .HostName }}",
+          "type": "session"
+        },
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": ")─[",
+          "type": "text"
+        },
+        {
+          "foreground": "#f9e2af",
+          "properties": {
+            "display_mode": "environment",
+            "fetch_virtual_env": true
+          },
+          "style": "plain",
+          "template": "venv {{ .Full }}",
+          "type": "python"
+        },
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": "]─[",
+          "type": "text"
+        },
+        {
+          "foreground": "#cdd6f4",
+          "properties": {
+            "style": "full"
+          },
+          "style": "plain",
+          "template": "{{ .Path }}",
+          "type": "path"
+        },
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": "]─[",
+          "type": "text"
+        },
+        {
+          "foreground": "#a6e3a1",
+          "properties": {
+            "fetch_status": true
+          },
+          "style": "plain",
+          "template": "{{ .UpstreamIcon }}{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }}",
+          "type": "git"
+        },
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": "]",
+          "type": "text"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "#888888",
+          "style": "plain",
+          "template": "└──",
+          "type": "text"
+        },
+        {
+          "foreground": "#cdd6f4",
+          "style": "plain",
+          "template": "$ ",
+          "type": "text"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "version": 3
+}
