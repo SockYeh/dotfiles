@@ -10,4 +10,4 @@ if status is-interactive
     zoxide init fish --cmd cd | source
 end
 
-oh-my-posh init fish --config ~/custom.omp.json | source
+oh-my-posh init fish --config "$HOME/.config/oh-my-posh.omp.json" | source
