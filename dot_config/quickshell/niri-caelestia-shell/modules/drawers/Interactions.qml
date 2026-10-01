@@ -39,25 +39,22 @@ CustomMouseArea {
     cursorShape: draggingBar && pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
-        const panelY = Config.border.thickness + panel.y;
+        const panelY = bar.implicitHeight + panel.y;
         return y >= panelY - Config.border.rounding && y <= panelY + panel.height + Config.border.rounding;
     }
 
     function withinPanelWidth(panel: Item, x: real, y: real): bool {
-        const panelX = bar.implicitWidth + panel.x;
+        const panelX = Config.border.thickness + panel.x;
         return x >= panelX - Config.border.rounding && x <= panelX + panel.width + Config.border.rounding;
     }
 
-    function inLeftPanel(panel: Item, x: real, y: real): bool {
-        return x < bar.implicitWidth + panel.x + panel.width && withinPanelHeight(panel, x, y);
-    }
-
     function inRightPanel(panel: Item, x: real, y: real): bool {
-        return x > bar.implicitWidth + panel.x && withinPanelHeight(panel, x, y);
+        return x > Config.border.thickness + panel.x && withinPanelHeight(panel, x, y);
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
-        return y < Config.border.thickness + panel.y + panel.height && withinPanelWidth(panel, x, y);
+        const panelY = bar.implicitHeight + panel.y;
+        return y >= panelY && y <= panelY + panel.height + Config.border.rounding && withinPanelWidth(panel, x, y);
     }
 
     function inBottomPanel(panel: Item, x: real, y: real): bool {
@@ -65,8 +62,8 @@ CustomMouseArea {
     }
 
     function onWheel(event: WheelEvent): void {
-        if (event.x < bar.implicitWidth) {
-            bar.handleWheel(event.y, event.angleDelta);
+        if (event.y < bar.implicitHeight) {
+            bar.handleWheel(event.x, event.angleDelta);
         }
     }
 
@@ -75,7 +72,7 @@ CustomMouseArea {
 
     onPressed: event => {
         dragStart = Qt.point(event.x, event.y);
-        draggingBar = dragStart.x < bar.implicitWidth;
+        draggingBar = dragStart.y < bar.implicitHeight;
     }
 
     onReleased: event => {
@@ -116,16 +113,16 @@ CustomMouseArea {
         const y = event.y;
 
         // Show bar in non-exclusive mode on hover
-        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth)
+        if (!visibilities.bar && Config.bar.showOnHover && y < bar.implicitHeight)
             bar.isHovered = true;
         // console.log("Bar hovered!")
 
         // Show/hide bar on drag
-        if (pressed && dragStart.x < bar.implicitWidth) {
-            const dragX = x - dragStart.x;
-            if (dragX > Config.bar.dragThreshold)
+        if (pressed && dragStart.y < bar.implicitHeight) {
+            const dragY = y - dragStart.y;
+            if (dragY > Config.bar.dragThreshold)
                 visibilities.bar = true;
-            else if (dragX < -Config.bar.dragThreshold)
+            else if (dragY < -Config.bar.dragThreshold)
                 visibilities.bar = false;
         }
 
@@ -162,8 +159,8 @@ CustomMouseArea {
                 visibilities.launcher = false;
         }
 
-        // Show dashboard on hover
-        const showDashboard = Config.dashboard.showOnHover && inTopPanel(panels.dashboard, x, y);
+        // Show dashboard on hover: over the centred clock, or over the panel itself
+        const showDashboard = Config.dashboard.showOnHover && (inTopPanel(panels.dashboard, x, y) || bar.clockHovered(x, y));
 
         // Always update visibility based on hover if not in shortcut mode
         if (!isShortcutActive("dashboard")) {
@@ -205,9 +202,9 @@ CustomMouseArea {
         }
 
         // Show popouts on hover
-        if (x < bar.implicitWidth)
-            bar.checkPopout(y);
-        else if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword" && !inLeftPanel(panels.popouts, x, y))
+        if (y < bar.implicitHeight)
+            bar.checkPopout(x);
+        else if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword" && !inTopPanel(panels.popouts, x, y))
             popouts.hasCurrent = false;
     }
 

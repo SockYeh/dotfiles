@@ -58,7 +58,7 @@ Item {
 
                     anchors.fill: parent
                     anchors.margins: Config.border.thickness
-                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.sm * Config.background.visualiser.spacing
+                    anchors.topMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.sm * Config.background.visualiser.spacing
 
                     Side {
                         content: content
@@ -68,7 +68,7 @@ Item {
                         isRight: true
                     }
 
-                    Behavior on anchors.leftMargin {
+                    Behavior on anchors.topMargin {
                         Anim {}
                     }
                 }

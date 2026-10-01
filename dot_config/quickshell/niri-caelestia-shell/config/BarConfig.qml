@@ -23,18 +23,6 @@ JsonObject {
             enabled: true
         },
         {
-            id: "spacer",
-            enabled: true
-        },
-        {
-            id: "activeWindow",
-            enabled: true
-        },
-        {
-            id: "spacer",
-            enabled: true
-        },
-        {
             id: "tray",
             enabled: true
         },
@@ -43,7 +31,19 @@ JsonObject {
             enabled: true
         },
         {
+            id: "spacer",
+            enabled: true
+        },
+        {
             id: "clock",
+            enabled: true
+        },
+        {
+            id: "spacer",
+            enabled: true
+        },
+        {
+            id: "divider",
             enabled: true
         },
         {

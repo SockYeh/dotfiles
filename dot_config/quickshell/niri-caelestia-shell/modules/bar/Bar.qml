@@ -9,13 +9,23 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-ColumnLayout {
+Item {
     id: root
 
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
-    readonly property int vPadding: Appearance.padding.xl
+    readonly property int hPadding: Appearance.padding.xl
+
+    // The clock is rendered outside the row flow, pinned to the exact centre of the bar
+    readonly property bool showClock: {
+        const entries = Config.bar.entries;
+        for (let i = 0; i < entries.length; i++) {
+            if (entries[i].id === "clock" && entries[i].enabled)
+                return true;
+        }
+        return false;
+    }
 
     // Handle Workspace Popouts for Niri
 
@@ -30,7 +40,7 @@ ColumnLayout {
 
     // Handle Popouts Hover
 
-    function checkPopout(y: real): void {
+    function checkPopout(x: real): void {
         if (Niri.wsContextType === "workspaces") {
             // Workspace context menu
             const anchor = Niri.wsContextAnchor;
@@ -38,42 +48,45 @@ ColumnLayout {
                 popouts.hasCurrent = false;
                 return;
             }
-            popouts.currentCenter = Qt.binding(() => Math.round(anchor.mapToItem(root, anchor.width, (anchor.height) / 2).y));
+            popouts.currentCenter = Qt.binding(() => Math.round(anchor.mapToItem(root, anchor.width / 2, anchor.height).x));
             return;
         }
 
-        const ch = childAt(width / 2, y) as WrappedLoader;
+        const ch = row.childAt(x, height / 2) as WrappedLoader;
         if (!ch?.item) {
             popouts.hasCurrent = false;
             return;
         }
 
         const id = ch.id;
-        const top = ch.y;
+        const left = ch.x;
         const item = ch.item;
-        const itemHeight = item.implicitHeight;
+        const itemWidth = item.implicitWidth;
+        const sticky = popouts.currentName.startsWith("traymenu") || popouts.currentName === "wirelesspassword";
 
         if (id === "statusIcons") {
             const items = item.items;
-            const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
+            const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
             if (icon) {
                 popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, icon.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray") {
-            const index = Math.floor(((y - top) / itemHeight) * item.items.count);
+            const index = Math.floor(((x - left) / itemWidth) * item.items.count);
             const trayItem = item.items.itemAt(index);
             if (trayItem) {
                 popouts.currentName = `traymenu${index}`;
-                popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
+                popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, trayItem.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
             }
+        } else if (!sticky) {
+            popouts.hasCurrent = false;
         }
     }
 
-    function handleWheel(y: real, angleDelta: point): void {
-        const ch = childAt(width / 2, y) as WrappedLoader;
+    function handleWheel(x: real, angleDelta: point): void {
+        const ch = row.childAt(x, height / 2) as WrappedLoader;
         if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
             Niri.switchToWorkspaceUpDown(angleDelta.y > 0 ? "up" : "down");
         } else if (Config.bar.scrollActions.volume) {
@@ -84,110 +97,140 @@ ColumnLayout {
         }
     }
 
-    spacing: Appearance.spacing.lg
+    // True when the pointer is over the centred clock (opens the dashboard)
+    function clockHovered(mx: real, my: real): bool {
+        if (!clockLoader.item)
+            return false;
+        const p = clockLoader.mapToItem(null, 0, 0);
+        return mx >= p.x && mx <= p.x + clockLoader.width && my >= p.y && my <= p.y + clockLoader.height;
+    }
 
-    Repeater {
-        id: repeater
+    RowLayout {
+        id: row
 
-        model: Config.bar.entries
+        anchors.fill: parent
+        spacing: Appearance.spacing.lg
 
-        DelegateChooser {
-            role: "id"
+        Repeater {
+            id: repeater
 
-            DelegateChoice {
-                roleValue: "spacer"
-                delegate: WrappedLoader {
-                    Layout.fillHeight: enabled
+            model: {
+                // The clock is rendered separately, pinned to the bar's centre
+                const out = [];
+                const entries = Config.bar.entries;
+                for (let i = 0; i < entries.length; i++) {
+                    if (entries[i].id !== "clock")
+                        out.push(entries[i]);
                 }
+                return out;
             }
-            DelegateChoice {
-                roleValue: "divider"
-                delegate: WrappedLoader {
-                    sourceComponent: Rectangle {
-                        implicitWidth: Appearance.padding.md
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
+
+            DelegateChooser {
+                role: "id"
+
+                DelegateChoice {
+                    roleValue: "spacer"
+                    delegate: WrappedLoader {
+                        Layout.fillWidth: enabled
                     }
                 }
-            }
-            DelegateChoice {
-                roleValue: "logo"
-                delegate: WrappedLoader {
-                    sourceComponent: OsIcon {
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: mouse => {
-                                if (mouse.button === Qt.RightButton) {
-                                    Niri.wsContextType = "workspaces";
+                DelegateChoice {
+                    roleValue: "divider"
+                    delegate: WrappedLoader {
+                        sourceComponent: Rectangle {
+                            implicitWidth: 1
+                            implicitHeight: Appearance.padding.md
+                            color: Colours.palette.m3outlineVariant
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "logo"
+                    delegate: WrappedLoader {
+                        sourceComponent: OsIcon {
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.RightButton
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        Niri.wsContextType = "workspaces";
+                                        root.popouts.currentName = "wsWindow";
+                                        root.popouts.hasCurrent = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "workspaces"
+                    delegate: WrappedLoader {
+                        sourceComponent: Workspaces {
+
+                            property var anchorItem: Niri.wsContextAnchor && Niri.wsContextType !== "none" ? Niri.wsContextAnchor : null
+
+                            onRequestWindowPopout: {
+                                if (anchorItem && Config.bar.workspaces.windowRighClickContext) {
                                     root.popouts.currentName = "wsWindow";
+                                    root.popouts.currentCenter = Qt.binding(() => Math.round(anchorItem.mapToItem(null, anchorItem.width / 2, anchorItem.height).x));
                                     root.popouts.hasCurrent = true;
                                 }
                             }
                         }
                     }
                 }
-            }
-            DelegateChoice {
-                roleValue: "workspaces"
-                delegate: WrappedLoader {
-                    sourceComponent: Workspaces {
-
-                        property var anchorItem: Niri.wsContextAnchor && Niri.wsContextType !== "none" ? Niri.wsContextAnchor : null
-
-                        onRequestWindowPopout: {
-                            if (anchorItem && Config.bar.workspaces.windowRighClickContext) {
-                                root.popouts.currentName = "wsWindow";
-                                root.popouts.currentCenter = Qt.binding(() => Math.round(anchorItem.mapToItem(null, anchorItem.width, (anchorItem.height) / 2).y));
-                                root.popouts.hasCurrent = true;
-                            }
+                DelegateChoice {
+                    roleValue: "activeWindow"
+                    delegate: WrappedLoader {
+                        sourceComponent: ActiveWindow {
+                            bar: root
+                            monitor: Brightness.getMonitorForScreen(root.screen)
                         }
                     }
                 }
-            }
-            DelegateChoice {
-                roleValue: "activeWindow"
-                delegate: WrappedLoader {
-                    sourceComponent: ActiveWindow {
-                        bar: root
-                        monitor: Brightness.getMonitorForScreen(root.screen)
+                DelegateChoice {
+                    roleValue: "tray"
+                    delegate: WrappedLoader {
+                        sourceComponent: Tray {}
                     }
                 }
-            }
-            DelegateChoice {
-                roleValue: "tray"
-                delegate: WrappedLoader {
-                    sourceComponent: Tray {}
-                }
-            }
-            DelegateChoice {
-                roleValue: "clock"
-                delegate: WrappedLoader {
-                    sourceComponent: Clock {}
-                }
-            }
-            DelegateChoice {
-                roleValue: "statusIcons"
-                delegate: WrappedLoader {
-                    sourceComponent: StatusIcons {}
-                }
-            }
-            DelegateChoice {
-                roleValue: "power"
-                delegate: WrappedLoader {
-                    sourceComponent: Power {
-                        visibilities: root.visibilities
+                DelegateChoice {
+                    roleValue: "statusIcons"
+                    delegate: WrappedLoader {
+                        sourceComponent: StatusIcons {}
                     }
                 }
+                DelegateChoice {
+                    roleValue: "power"
+                    delegate: WrappedLoader {
+                        sourceComponent: Power {
+                            visibilities: root.visibilities
+                        }
+                    }
+                }
+                // DelegateChoice {
+                //     roleValue: "idleInhibitor"
+                //     delegate: WrappedLoader {
+                //         sourceComponent: IdleInhibitor {}
+                //     }
+                // }
             }
-            // DelegateChoice {
-            //     roleValue: "idleInhibitor"
-            //     delegate: WrappedLoader {
-            //         sourceComponent: IdleInhibitor {}
-            //     }
-            // }
         }
+    }
+
+    // Centred clock overlay
+    Loader {
+        id: clockLoader
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+
+        active: root.showClock
+        visible: active
+        asynchronous: true
+
+        sourceComponent: Clock {}
     }
 
     // Cached first/last enabled items — recomputed once when repeater changes
@@ -222,10 +265,10 @@ ColumnLayout {
 
         onEnabledChanged: root.updateEnabledCache()
 
-        Layout.alignment: Qt.AlignHCenter
+        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-        Layout.topMargin: root.firstEnabled === this ? root.vPadding : 0
-        Layout.bottomMargin: root.lastEnabled === this ? root.vPadding : 0
+        Layout.leftMargin: root.firstEnabled === this ? root.hPadding : 0
+        Layout.rightMargin: root.lastEnabled === this ? root.hPadding : 0
 
         asynchronous: true
         visible: enabled

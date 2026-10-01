@@ -35,7 +35,7 @@ Item {
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
-    anchors.leftMargin: bar.implicitWidth
+    anchors.topMargin: bar.implicitHeight
 
     MangaModule.Wrapper {
         id: manga
@@ -108,13 +108,13 @@ Item {
 
         screen: root.screen
 
-        x: isDetached ? (root.width - nonAnimWidth) / 2 : 0
-        y: {
+        y: isDetached ? (root.height - nonAnimHeight) / 2 : 0
+        x: {
             if (isDetached)
-                return (root.height - nonAnimHeight) / 2;
+                return (root.width - nonAnimWidth) / 2;
 
-            const off = currentCenter - Config.border.thickness - nonAnimHeight / 2;
-            const diff = root.height - Math.floor(off + nonAnimHeight);
+            const off = currentCenter - Config.border.thickness - nonAnimWidth / 2;
+            const diff = root.width - Math.floor(off + nonAnimWidth);
             if (diff < 0)
                 return off + diff;
             return Math.max(off, 0);

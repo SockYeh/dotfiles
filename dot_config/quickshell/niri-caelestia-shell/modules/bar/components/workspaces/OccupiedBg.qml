@@ -62,19 +62,17 @@ Item {
             }
 
             anchors {
-                // horizontalCenter: root.horizontalCenter
-                left: root.left
-                right: root.right
-                rightMargin: isContextActiveInWs ? -Config.bar.workspaces.windowContextWidth + Appearance.padding.xs : 0
+                top: root.top
+                bottom: root.bottom
             }
 
             topRightRadius: isContextActiveInWs ? Appearance.rounding.normal : radius
             bottomRightRadius: isContextActiveInWs ? Appearance.rounding.normal : radius
 
-            y: (start?.y ?? 0)
+            x: (start?.x ?? 0)
             // implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.xs * 2 + 2
-            implicitHeight: start && end ? end.y + end.size - start.y : 0
-            // implicitHeight: end?.y + end?.height - start?.y
+            implicitWidth: start && end ? (isContextActiveInWs ? Config.bar.workspaces.windowContextWidth + Config.bar.workspaces.windowIconSize : end.x + end.size - start.x) : 0
+            // implicitWidth: end?.x + end?.width - start?.x
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             radius: Appearance.rounding.full
@@ -99,19 +97,11 @@ Item {
                 }
             }
 
-            Behavior on anchors.rightMargin {
-                Anim {
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-
-            Behavior on y {
+            Behavior on x {
                 Anim {}
             }
 
-            Behavior on implicitHeight {
+            Behavior on implicitWidth {
                 Anim {}
             }
         }
