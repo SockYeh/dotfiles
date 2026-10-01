@@ -1,6 +1,9 @@
 // ────────────── Startup Applications ──────────────
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Miscellaneous#spawn-sh-at-startup
 
-    spawn-at-startup "noctalia"
+    // spawn-at-startup "noctalia"
+    spawn-at-startup "quickshell" "-c" "niri-caelestia-shell" "-n"
+    spawn-at-startup "bash" "-c" "wl-paste --type text --watch cliphist store &"
+    spawn-at-startup "bash" "-c" "wl-paste --type image --watch cliphist store &"
     spawn-at-startup "spotify-launcher"
     spawn-at-startup "firefox"

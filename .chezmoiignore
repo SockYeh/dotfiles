@@ -1,1 +1,4 @@
 private_tokens_or_secrets_pattern
+.config/quickshell/niri-caelestia-shell/.git/**
+.config/quickshell/niri-caelestia-shell/build/**
+.config/quickshell/niri-caelestia-shell/**/__pycache__/**
