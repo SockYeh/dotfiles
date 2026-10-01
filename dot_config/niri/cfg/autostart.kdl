@@ -3,7 +3,7 @@
 
     // spawn-at-startup "noctalia"
     spawn-at-startup "quickshell" "-c" "niri-caelestia-shell" "-n"
-    spawn-at-startup "bash" "-c" "wl-paste --type text --watch cliphist store &"
-    spawn-at-startup "bash" "-c" "wl-paste --type image --watch cliphist store &"
+    // background helpers (clipboard watchers, ...) live here
+    spawn-at-startup "/home/sockyeh/.config/niri/autostart.sh"
     spawn-at-startup "spotify-launcher"
     spawn-at-startup "firefox"
