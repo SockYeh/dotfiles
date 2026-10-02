@@ -61,18 +61,84 @@ Variants {
                     height: bar.implicitHeight
                 }
 
+                // The dashboard's fill (modules/dashboard/Background.qml) is
+                // wider than the body at the very top — the top edge runs out
+                // to a tip either side and each shoulder is a concave cove back
+                // down to the body's edge. A Region is only ever a rect or an
+                // ellipse, so the same silhouette is built here as "body plus a
+                // flared top band, minus the two cove bites", where each bite
+                // is the top half of an ellipse centred on the body's top
+                // corner — exactly the curve the fill's shoulder arc draws.
+                //
+                // This has to track the fill precisely. If the blur is merely a
+                // rectangle, its edge reads as the panel's edge and the flare
+                // disappears; if it reaches past the body lower down, it leaves
+                // bright strips down both sides.
                 Region {
-                    item: panels.dashboard
-                    radius: 0
+                    id: dashBlur
 
-                    // Square off the panel's top corners. Its fill flares
-                    // outward there (external fillets), so the blur has to
-                    // cover that band instead of clipping it back rounded.
+                    readonly property int flare: Config.border.rounding
+                    readonly property int bodyX: panels.dashboard.x + Config.border.thickness
+                    readonly property int bodyY: panels.dashboard.y + bar.implicitHeight
+                    readonly property int bodyW: panels.dashboard.width
+
+                    // Body plus the wings, then carve it back to shape. Every
+                    // Region in a boolean chain needs its own rect — an unset
+                    // one is empty, so Subtract/Intersect would collapse.
+                    x: dashBlur.bodyX - dashBlur.flare
+                    y: dashBlur.bodyY
+                    width: dashBlur.bodyW + dashBlur.flare * 2
+                    height: panels.dashboard.height
+                    radius: 0
+                    intersection: Intersection.Subtract
+
+                    // Wings only exist in the top band; trim them off below it.
                     Region {
-                        x: -Config.border.rounding
-                        y: -Config.border.rounding
-                        width: panels.dashboard.width + Config.border.rounding * 2
-                        height: Config.border.rounding * 2
+                        x: dashBlur.bodyX - dashBlur.flare
+                        y: dashBlur.bodyY + dashBlur.flare
+                        width: dashBlur.flare
+                        height: panels.dashboard.height - dashBlur.flare
+                    }
+
+                    Region {
+                        x: dashBlur.bodyX + dashBlur.bodyW
+                        y: dashBlur.bodyY + dashBlur.flare
+                        width: dashBlur.flare
+                        height: panels.dashboard.height - dashBlur.flare
+                    }
+
+                    // Top-left cove.
+                    Region {
+                        x: dashBlur.bodyX - dashBlur.flare * 2
+                        y: dashBlur.bodyY
+                        width: dashBlur.flare * 4
+                        height: dashBlur.flare
+                        intersection: Intersection.Intersect
+
+                        Region {
+                            shape: RegionShape.Ellipse
+                            x: dashBlur.bodyX - dashBlur.flare * 2
+                            y: dashBlur.bodyY
+                            width: dashBlur.flare * 2
+                            height: dashBlur.flare * 2
+                        }
+                    }
+
+                    // Top-right cove, mirrored.
+                    Region {
+                        x: dashBlur.bodyX + dashBlur.bodyW - dashBlur.flare * 2
+                        y: dashBlur.bodyY
+                        width: dashBlur.flare * 4
+                        height: dashBlur.flare
+                        intersection: Intersection.Intersect
+
+                        Region {
+                            shape: RegionShape.Ellipse
+                            x: dashBlur.bodyX + dashBlur.bodyW
+                            y: dashBlur.bodyY
+                            width: dashBlur.flare * 2
+                            height: dashBlur.flare * 2
+                        }
                     }
                 }
             }
