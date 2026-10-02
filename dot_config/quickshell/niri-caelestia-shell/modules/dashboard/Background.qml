@@ -24,30 +24,38 @@ ShapePath {
     // cards that hold text are drawn as opaque boxes over it.
     fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
-    // Square top edge: the panel butts straight up against the bar strip so
-    // the two read as one continuous base instead of a flared "connector".
-    // Only the bottom corners are rounded.
+    // Top corners: EXTERNAL fillets (the "flipped" of the internal fillet).
+    // Same radius as the bottom corners, but the curve control point sits on
+    // the corner itself, so the outline bulges out to the corner instead of
+    // being cut away from it — the panel flows out of the bar instead of
+    // ending in a separate bubble. Bottom corners keep the internal fillet.
     PathMove {
         x: root.leftEdge
-        y: 0
+        y: root.roundingY
     }
 
-    PathLine {
-        relativeX: 0
-        relativeY: root.wrapper.height - root.roundingY
-    }
-
-    PathArc {
-        relativeX: root.rounding
-        relativeY: root.roundingY
-        radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
-        direction: PathArc.Counterclockwise
+    PathQuad {
+        x: root.rounding
+        y: -root.roundingY
+        controlX: 0
+        controlY: -root.roundingY
     }
 
     PathLine {
         relativeX: root.wrapper.width - root.rounding * 2
         relativeY: 0
+    }
+
+    PathQuad {
+        x: root.rounding
+        y: root.roundingY
+        controlX: root.rounding
+        controlY: 0
+    }
+
+    PathLine {
+        relativeX: 0
+        relativeY: root.wrapper.height - root.roundingY * 2
     }
 
     PathArc {
@@ -59,14 +67,21 @@ ShapePath {
     }
 
     PathLine {
-        relativeX: 0
-        relativeY: -(root.wrapper.height - root.roundingY)
+        relativeX: root.wrapper.width - root.rounding * 2
+        relativeY: 0
     }
 
-    // Close the top edge explicitly.
+    PathArc {
+        relativeX: -root.rounding
+        relativeY: root.roundingY
+        radiusX: root.rounding
+        radiusY: Math.min(root.rounding, root.wrapper.height)
+        direction: PathArc.Counterclockwise
+    }
+
     PathLine {
-        relativeX: -root.wrapper.width
-        relativeY: 0
+        relativeX: 0
+        relativeY: -(root.wrapper.height - root.roundingY * 2)
     }
 
     Behavior on fillColor {
