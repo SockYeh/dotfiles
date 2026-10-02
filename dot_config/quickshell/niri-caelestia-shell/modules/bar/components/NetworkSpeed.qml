@@ -8,7 +8,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-// Live network throughput: upload first, then download.
+// Live network throughput: download first, then upload.
 StyledRect {
     id: root
 
@@ -33,31 +33,6 @@ StyledRect {
         }
 
         WrappedLoader {
-            name: "upload"
-            active: true
-
-            sourceComponent: RowLayout {
-                spacing: Appearance.spacing.small
-
-                MaterialIcon {
-                    animate: false
-                    text: "upload"
-                    color: root.colour
-                }
-
-                StyledText {
-                    animate: false
-                    text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
-                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                    }
-                    color: root.colour
-                    font.family: Appearance.font.family.mono
-                }
-            }
-        }
-
-        WrappedLoader {
             name: "download"
             active: true
 
@@ -74,6 +49,31 @@ StyledRect {
                     animate: false
                     text: {
                         const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
+                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
+                    }
+                    color: root.colour
+                    font.family: Appearance.font.family.mono
+                }
+            }
+        }
+
+        WrappedLoader {
+            name: "upload"
+            active: true
+
+            sourceComponent: RowLayout {
+                spacing: Appearance.spacing.small
+
+                MaterialIcon {
+                    animate: false
+                    text: "upload"
+                    color: root.colour
+                }
+
+                StyledText {
+                    animate: false
+                    text: {
+                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
                         return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
                     }
                     color: root.colour

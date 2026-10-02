@@ -66,16 +66,21 @@ Item {
         const sticky = popouts.currentName.startsWith("traymenu") || popouts.currentName === "wirelesspassword";
 
         if (id === "statusIcons") {
-            const items = item.items;
-            const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
-            if (icon) {
+            // Icons live inside per-pill RowLayouts now, so ask the component
+            // which entry (if any) is under the cursor.
+            const name = item.itemNameAt(x);
+            if (name) {
                 // The mic icon shares the audio popout; brightness has its own
-                popouts.currentName = icon.name === "microphone" ? "audio" : icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, icon.implicitWidth / 2, 0).x);
+                popouts.currentName = name === "microphone" ? "audio" : name;
+                popouts.currentCenter = Qt.binding(() => item.mapToItem(root, item.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
             } else if (!sticky) {
                 popouts.hasCurrent = false;
             }
+        } else if (id === "networkspeed") {
+            // No popout for the throughput pill; don't clear a sticky one
+            if (!sticky)
+                popouts.hasCurrent = false;
         } else if (id === "tray") {
             // The tray is a single button that opens the dropdown popout
             if (Config.bar.popouts.tray) {
