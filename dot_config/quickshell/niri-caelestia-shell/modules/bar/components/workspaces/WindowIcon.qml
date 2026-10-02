@@ -289,7 +289,7 @@ Item {
             height: badgeLoader.calculateMargins().size
 
             StyledText {
-                animate: true
+                animate: false
                 anchors.centerIn: parent
                 text: iconItem.windowCount
                 font.family: Appearance.font.family.mono

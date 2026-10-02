@@ -40,7 +40,7 @@ Item {
                 width: parent.width
                 height: parent.height
 
-                animate: true
+                animate: false
                 text: {
                     //TODO: Add config option to choose between name/number/both for workspaces
 

@@ -227,6 +227,12 @@ Item {
                     }
                 }
                 DelegateChoice {
+                    roleValue: "networkspeed"
+                    delegate: WrappedLoader {
+                        sourceComponent: NetworkSpeed {}
+                    }
+                }
+                DelegateChoice {
                     roleValue: "activeWindow"
                     delegate: WrappedLoader {
                         sourceComponent: ActiveWindow {

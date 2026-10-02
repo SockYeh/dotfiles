@@ -23,7 +23,7 @@ Item {
     readonly property var monitor: Brightness.getMonitorForScreen(screen)
     property color colour: Colours.palette.m3secondary
     readonly property alias items: pillRow
-    readonly property var pills: [systemPill, networkPill, speedPill]
+    readonly property var pills: [systemPill, networkPill]
 
     implicitWidth: pillRow.implicitWidth
     implicitHeight: Config.bar.sizes.innerWidth
@@ -168,7 +168,7 @@ Item {
                         }
 
                         StyledText {
-                            animate: true
+                            animate: false
                             text: `${Math.round(Audio.volume * 100)}%`
                             color: root.colour
                             font.family: Appearance.font.family.mono
@@ -216,7 +216,7 @@ Item {
                         }
 
                         StyledText {
-                            animate: true
+                            animate: false
                             text: `${Math.round((root.monitor?.brightness ?? 0.5) * 100)}%`
                             color: root.colour
                             font.family: Appearance.font.family.mono
@@ -257,7 +257,7 @@ Item {
                         }
 
                         StyledText {
-                            animate: true
+                            animate: false
                             visible: UPower.displayDevice.isLaptopBattery
                             text: `${Math.round((UPower.displayDevice.percentage ?? 0) * 100)}%`
                             color: root.colour
@@ -305,7 +305,7 @@ Item {
                         }
 
                         StyledText {
-                            animate: true
+                            animate: false
                             visible: (Network.active?.ssid ?? "") !== ""
                             text: Network.active?.ssid ?? ""
                             color: root.colour
@@ -345,85 +345,6 @@ Item {
             }
         }
 
-        // ------------------------------------------------------------------
-        // Throughput
-        // ------------------------------------------------------------------
-        StyledRect {
-            id: speedPill
-
-            readonly property alias contentRow: speedRow
-
-            color: Colours.tPalette.m3surfaceContainer
-            radius: Appearance.rounding.full
-            clip: true
-
-            Layout.alignment: Qt.AlignVCenter
-            implicitWidth: speedRow.implicitWidth + Appearance.padding.md * 2
-            implicitHeight: Config.bar.sizes.innerWidth
-            visible: speedRow.implicitWidth > 0
-
-            RowLayout {
-                id: speedRow
-
-                anchors.centerIn: parent
-                spacing: Appearance.spacing.md
-
-                // Keeps the NetworkUsage poller running while the pill exists
-                Ref {
-                    service: NetworkUsage
-                }
-
-                WrappedLoader {
-                    name: "download"
-                    active: true
-
-                    sourceComponent: RowLayout {
-                        spacing: Appearance.spacing.small
-
-                        MaterialIcon {
-                            animate: false
-                            text: "download"
-                            color: root.colour
-                        }
-
-                        StyledText {
-                            animate: true
-                            text: {
-                                const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
-                                return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                            }
-                            color: root.colour
-                            font.family: Appearance.font.family.mono
-                        }
-                    }
-                }
-
-                WrappedLoader {
-                    name: "upload"
-                    active: true
-
-                    sourceComponent: RowLayout {
-                        spacing: Appearance.spacing.small
-
-                        MaterialIcon {
-                            animate: false
-                            text: "upload"
-                            color: root.colour
-                        }
-
-                        StyledText {
-                            animate: true
-                            text: {
-                                const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
-                                return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                            }
-                            color: root.colour
-                            font.family: Appearance.font.family.mono
-                        }
-                    }
-                }
-            }
-        }
     }
 
     component WrappedLoader: Loader {

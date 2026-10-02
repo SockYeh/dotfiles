@@ -63,7 +63,7 @@ Item {
         x: art.width + Appearance.spacing.small
         anchors.verticalCenter: parent.verticalCenter
 
-        animate: true
+        animate: false
         text: {
             const artist = (Players.active?.trackArtist ?? "").trim();
             return artist ? `${root.title} — ${artist}` : root.title;
