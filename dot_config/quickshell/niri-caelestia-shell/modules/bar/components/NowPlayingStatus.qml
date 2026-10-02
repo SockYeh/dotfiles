@@ -93,26 +93,5 @@ Item {
             }
         }
 
-        // Horizontal scroll (or shift + wheel) skips tracks; a plain vertical
-        // wheel is left to the bar's volume/brightness actions.
-        onWheel: wheel => {
-            let dx = wheel.angleDelta.x;
-            if (dx === 0 && (wheel.modifiers & Qt.ShiftModifier))
-                dx = wheel.angleDelta.y;
-            if (dx === 0)
-                return;
-
-            const player = Players.active;
-            if (!player)
-                return;
-
-            wheel.accepted = true;
-            if (dx > 0) {
-                if (player.canGoNext)
-                    player.next();
-            } else if (player.canGoPrevious) {
-                player.previous();
-            }
-        }
     }
 }

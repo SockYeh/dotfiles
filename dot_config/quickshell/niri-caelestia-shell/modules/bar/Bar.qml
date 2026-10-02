@@ -91,6 +91,23 @@ Item {
     }
 
     function handleWheel(x: real, angleDelta: point): void {
+        // Horizontal scroll over the media pill skips tracks. Handled here
+        // because wheel events over the bar are routed through this function,
+        // not the pill's own MouseArea.
+        if (angleDelta.x !== 0 && overNowPlaying(x)) {
+            const player = Players.active;
+            if (!player)
+                return;
+
+            if (angleDelta.x > 0) {
+                if (player.canGoNext)
+                    player.next();
+            } else if (player.canGoPrevious) {
+                player.previous();
+            }
+            return;
+        }
+
         const ch = row.childAt(x, height / 2) as WrappedLoader;
         if (!ch?.item)
             return;
@@ -116,6 +133,14 @@ Item {
                 }
             }
         }
+    }
+
+    // True when x (in window coords) is over the now-playing pill
+    function overNowPlaying(x: real): bool {
+        if (!nowPlayingLoader.width || !nowPlayingLoader.item)
+            return false;
+        const p = nowPlayingLoader.mapToItem(null, 0, 0);
+        return x >= p.x && x <= p.x + nowPlayingLoader.width;
     }
 
     // True when the pointer is over the centred cluster (clock + now-playing)
