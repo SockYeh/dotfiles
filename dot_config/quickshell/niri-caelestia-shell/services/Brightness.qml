@@ -238,6 +238,14 @@ Singleton {
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN
+        // Last non-zero brightness, used to restore the display after it has
+        // been turned off (from the popup toggle or the screen timeout).
+        property real restoreBrightness: 0.5
+
+        onBrightnessChanged: {
+            if (brightness > 0.001)
+                restoreBrightness = brightness;
+        }
 
         readonly property Process initProc: Process {
             stdout: StdioCollector {

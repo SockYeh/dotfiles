@@ -16,7 +16,10 @@ Item {
 
     StyledRect {
         anchors.fill: parent
-        color: Colours.palette.m3surface
+        // Same base as the dashboard panel: a touch of translucency (the
+        // drawers group multiplies this by transparency.base) so the blur
+        // behind the bar strip reads through.
+        color: Qt.alpha(Colours.palette.m3surface, 0.8)
 
         layer.enabled: root.visible
         layer.effect: MultiEffect {

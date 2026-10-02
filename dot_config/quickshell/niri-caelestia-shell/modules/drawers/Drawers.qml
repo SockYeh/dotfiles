@@ -48,6 +48,25 @@ Variants {
             anchors.left: true
             anchors.right: true
 
+            // Frosted glass behind the shell's own panels, using
+            // ext-background-effect-v1. One region per panel, so the bar strip
+            // and the dashboard share the same blurred base; panels with zero
+            // height (closed) collapse to an empty region.
+            BackgroundEffect.blurRegion: Region {
+                Region {
+                    // Strip behind the bar — Border fills it, so blur it too.
+                    x: 0
+                    y: 0
+                    width: win.width
+                    height: bar.implicitHeight
+                }
+
+                Region {
+                    item: panels.dashboard
+                    radius: Config.border.rounding
+                }
+            }
+
             Variants {
                 id: regions
 

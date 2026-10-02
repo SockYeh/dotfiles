@@ -12,19 +12,27 @@ ShapePath {
     readonly property bool flatten: wrapper.height < rounding * 2
     readonly property real roundingY: flatten ? wrapper.height / 2 : rounding
 
-    strokeWidth: -1
-    fillColor: Colours.palette.m3surface
+    // Body edges, relative to the startX/startY the parent sets. startX is
+    // offset by one rounding, so the painted body lines up with the wrapper.
+    readonly property real leftEdge: startX + rounding
+    readonly property real rightEdge: leftEdge + wrapper.width
 
-    PathArc {
-        relativeX: root.rounding
-        relativeY: root.roundingY
-        radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
+    strokeWidth: -1
+    // Slightly see-through so the desktop behind bleeds through; the drawers
+    // group already applies transparency.base on top of this.
+    fillColor: Qt.alpha(Colours.palette.m3surface, 0.8)
+
+    // Square top edge: the panel butts straight up against the bar strip so
+    // the two read as one continuous base instead of a flared "connector".
+    // Only the bottom corners are rounded.
+    PathMove {
+        x: root.leftEdge
+        y: 0
     }
 
     PathLine {
         relativeX: 0
-        relativeY: root.wrapper.height - root.roundingY * 2
+        relativeY: root.wrapper.height - root.roundingY
     }
 
     PathArc {
@@ -50,14 +58,13 @@ ShapePath {
 
     PathLine {
         relativeX: 0
-        relativeY: -(root.wrapper.height - root.roundingY * 2)
+        relativeY: -(root.wrapper.height - root.roundingY)
     }
 
-    PathArc {
-        relativeX: root.rounding
-        relativeY: -root.roundingY
-        radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
+    // Close the top edge explicitly.
+    PathLine {
+        relativeX: -root.wrapper.width
+        relativeY: 0
     }
 
     Behavior on fillColor {
