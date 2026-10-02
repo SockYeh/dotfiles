@@ -76,8 +76,31 @@ Item {
     }
 
     MouseArea {
+        id: input
+
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.visibilities.dashboard = true
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+
+        onClicked: mouse => {
+            // Middle click toggles playback, left click opens the dashboard.
+            if (mouse.button === Qt.MiddleButton)
+                Players.playPause();
+            else
+                root.visibilities.dashboard = true;
+        }
+
+        // Horizontal scroll skips tracks; vertical scroll is left to the
+        // bar's own wheel actions (volume/brightness).
+        onWheel: wheel => {
+            const dx = wheel.angleDelta.x;
+            if (dx === 0)
+                return;
+            wheel.accepted = true;
+            if (dx > 0)
+                Players.next();
+            else
+                Players.previous();
+        }
     }
 }

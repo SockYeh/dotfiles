@@ -103,9 +103,11 @@ CustomMouseArea {
             if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword")
                 popouts.hasCurrent = false;
 
-            if (Config.bar.showOnHover)
+            // Keep the bar shown while a popout anchored to it (tray menus,
+            // etc.) is open — the pointer leaving the bar strip to enter the
+            // menu must not make the bar collapse out from under it.
+            if (Config.bar.showOnHover && !popouts.hasCurrent)
                 bar.isHovered = false;
-            console.log("Bar hidden");
         }
     }
 
@@ -213,8 +215,13 @@ CustomMouseArea {
         // Show popouts on hover
         if (y < bar.implicitHeight)
             bar.checkPopout(x);
-        else if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword" && !inTopPanel(panels.popouts, x, y))
+        else if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword" && !inTopPanel(panels.popouts, x, y)) {
             popouts.hasCurrent = false;
+            // The popout just closed and the pointer is off the bar, so the
+            // bar may collapse again.
+            if (Config.bar.showOnHover)
+                bar.isHovered = false;
+        }
     }
 
     // Monitor individual visibility changes

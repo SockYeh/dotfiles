@@ -129,7 +129,7 @@ StyledRect {
 
     Loader {
         id: pager
-        active: Config.bar.workspaces.pagerActive
+        active: false // TEMP TEST — pager
 
         anchors.top: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter

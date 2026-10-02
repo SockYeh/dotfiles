@@ -43,7 +43,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+            strokeColor: Colours.layer(Colours.tPalette.m3surfaceContainerHigh, 2)
             strokeWidth: Config.dashboard.sizes.mediaProgressThickness
             capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 

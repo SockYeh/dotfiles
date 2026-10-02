@@ -64,7 +64,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 160
             radius: Appearance.rounding.normal
-            color: Colours.palette.m3surfaceContainer
+            color: Colours.tPalette.m3surfaceContainer
 
             Row {
                 anchors.centerIn: parent
@@ -141,7 +141,7 @@ Item {
                         width: 110
                         height: 150
                         radius: Appearance.rounding.normal
-                        color: Colours.palette.m3surfaceContainer
+                        color: Colours.tPalette.m3surfaceContainer
 
                         Column {
                             anchors.centerIn: parent
@@ -194,7 +194,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 60
         radius: Appearance.rounding.small
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
 
         Row {
             anchors.centerIn: parent

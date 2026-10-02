@@ -17,7 +17,9 @@ ShapePath {
     property real sideRounding: startX > 0 ? -1 : 1
 
     strokeWidth: -1
-    fillColor: Colours.palette.m3surface
+    // Translucent frosted fill so the popout matches the bar pills instead of
+    // reading as an opaque black box.
+    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
     PathArc {
         relativeX: root.roundingX

@@ -77,6 +77,6 @@ GridLayout {
         radius: Appearance.rounding.small
         // Opaque box: everything that holds text sits on a solid plate so it
         // stays readable over the frosted panel base.
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
     }
 }

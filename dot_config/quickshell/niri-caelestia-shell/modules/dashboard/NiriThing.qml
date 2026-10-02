@@ -205,7 +205,7 @@ Item {
         function onClicked(): void {}
 
         radius: Appearance.rounding.full
-        color: active ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHigh
+        color: active ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainerHigh
 
         implicitHeight: label.implicitHeight + Appearance.padding.xs * 2
         implicitWidth: label.implicitWidth + Appearance.padding.md * 2
@@ -250,7 +250,7 @@ Item {
         function onClicked(): void {}
 
         radius: Appearance.rounding.small
-        color: active ? Colours.palette.m3primaryContainer : accent ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
+        color: active ? Colours.palette.m3primaryContainer : accent ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
         opacity: disabled ? 0.5 : 1
 
         implicitHeight: contentCol.implicitHeight + Appearance.padding.md * 2

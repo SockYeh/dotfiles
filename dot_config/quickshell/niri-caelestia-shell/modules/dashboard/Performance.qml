@@ -305,7 +305,7 @@ Item {
 
         property real value: 0
         property color fgColor: Colours.palette.m3primary
-        property color bgColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+        property color bgColor: Colours.layer(Colours.tPalette.m3surfaceContainerHigh, 2)
         property real animatedValue: 0
 
         color: bgColor
@@ -505,7 +505,7 @@ Item {
                         ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
                         ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+                        ctx.strokeStyle = Colours.layer(Colours.tPalette.m3surfaceContainerHigh, 2);
                         ctx.stroke();
                         if (gaugeCard.animatedPercentage > 0) {
                             ctx.beginPath();
@@ -661,7 +661,7 @@ Item {
                         ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
                         ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+                        ctx.strokeStyle = Colours.layer(Colours.tPalette.m3surfaceContainerHigh, 2);
                         ctx.stroke();
                         if (storageGaugeCard.animatedPercentage > 0) {
                             ctx.beginPath();
