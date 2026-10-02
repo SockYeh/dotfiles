@@ -116,14 +116,13 @@ Item {
             Niri.switchToWorkspaceUpDown(angleDelta.y > 0 ? "up" : "down");
         } else if (ch.id === "statusIcons") {
             // Scrolling only adjusts volume/brightness when over their icons
-            const items = ch.item.items;
-            const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
-            if (icon?.name === "audio" && Config.bar.scrollActions.volume) {
+            const icon = ch.item.itemNameAt(x);
+            if (icon === "audio" && Config.bar.scrollActions.volume) {
                 if (angleDelta.y > 0)
                     Audio.incrementVolume();
                 else if (angleDelta.y < 0)
                     Audio.decrementVolume();
-            } else if (icon?.name === "brightness" && Config.bar.scrollActions.brightness) {
+            } else if (icon === "brightness" && Config.bar.scrollActions.brightness) {
                 const monitor = ch.item.monitor;
                 if (monitor) {
                     if (angleDelta.y > 0)
