@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import qs.components
 import qs.services
 import qs.config
 import "popouts" as BarPopouts
@@ -250,6 +251,14 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: clockLoader.width + (nowPlayingLoader.width > 0 ? Appearance.spacing.lg : 0) + nowPlayingLoader.width
         height: Math.max(nowPlayingLoader.height, clockLoader.height)
+
+        // Background pill, matching the other bar segments (workspaces/tray/etc.)
+        StyledRect {
+            anchors.fill: parent
+            anchors.margins: -Appearance.padding.xs
+            color: Colours.tPalette.m3surfaceContainer
+            radius: Appearance.rounding.full
+        }
 
         Loader {
             id: clockLoader
