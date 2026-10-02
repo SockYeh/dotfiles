@@ -14,6 +14,15 @@ GridLayout {
     rowSpacing: Appearance.spacing.lg
     columnSpacing: Appearance.spacing.lg
 
+    // Declared before first use: inline components resolve in document order,
+    // so a Rect used above this point fails with "Rect is not a type".
+    component Rect: StyledRect {
+        radius: Appearance.rounding.small
+        // Opaque box: everything that holds text sits on a solid plate so it
+        // stays readable over the frosted panel base.
+        color: Colours.tPalette.m3surfaceContainer
+    }
+
     Rect {
         Layout.column: 2
         Layout.columnSpan: 3
@@ -71,12 +80,5 @@ GridLayout {
         Media {
             id: media
         }
-    }
-
-    component Rect: StyledRect {
-        radius: Appearance.rounding.small
-        // Opaque box: everything that holds text sits on a solid plate so it
-        // stays readable over the frosted panel base.
-        color: Colours.tPalette.m3surfaceContainer
     }
 }
