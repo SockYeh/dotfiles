@@ -63,7 +63,7 @@ Variants {
 
                 Region {
                     item: panels.dashboard
-                    radius: Config.border.rounding
+                    radius: 0
 
                     // Square off the panel's top corners. Its fill flares
                     // outward there (external fillets), so the blur has to

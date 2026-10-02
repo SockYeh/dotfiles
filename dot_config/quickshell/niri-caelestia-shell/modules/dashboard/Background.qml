@@ -17,6 +17,10 @@ ShapePath {
     readonly property real leftEdge: startX + rounding
     readonly property real rightEdge: leftEdge + wrapper.width
 
+    // The top corners flare outward into the wrapper's margin, so the panel
+    // reads as growing out of the bar instead of hanging below it.
+    readonly property real flare: rounding
+
     strokeWidth: -1
     // Frosted base: mostly see-through so the compositor's blur behind the
     // panel reads through instead of being hidden under an opaque plate.
@@ -24,38 +28,45 @@ ShapePath {
     // cards that hold text are drawn as opaque boxes over it.
     fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
-    // Top corners: EXTERNAL fillets (the "flipped" of the internal fillet).
-    // Same radius as the bottom corners, but the curve control point sits on
-    // the corner itself, so the outline bulges out to the corner instead of
-    // being cut away from it — the panel flows out of the bar instead of
-    // ending in a separate bubble. Bottom corners keep the internal fillet.
+    // Start at the outer edge of the top-left flare, which lines up with the
+    // wrapper's left border because startX is offset by one rounding.
     PathMove {
-        x: root.leftEdge
-        y: root.roundingY
+        x: root.leftEdge - root.flare
+        y: 0
     }
 
-    PathQuad {
-        x: root.rounding
-        y: -root.roundingY
-        controlX: 0
-        controlY: -root.roundingY
+    // Outer edge of the left flare.
+    PathLine {
+        relativeX: 0
+        relativeY: root.roundingY
+    }
+
+    // Convex shoulder: curves back in to the body's left edge.
+    PathArc {
+        relativeX: root.flare
+        relativeY: -root.roundingY
+        radiusX: root.flare
+        radiusY: Math.min(root.roundingY, root.wrapper.height)
+        direction: PathArc.Clockwise
+    }
+
+    // Down the body's left side to the bottom fillet.
+    PathLine {
+        relativeX: 0
+        relativeY: root.wrapper.height - root.roundingY
+    }
+
+    PathArc {
+        relativeX: root.rounding
+        relativeY: root.roundingY
+        radiusX: root.rounding
+        radiusY: Math.min(root.rounding, root.wrapper.height)
+        direction: PathArc.Counterclockwise
     }
 
     PathLine {
         relativeX: root.wrapper.width - root.rounding * 2
         relativeY: 0
-    }
-
-    PathQuad {
-        x: root.rounding
-        y: root.roundingY
-        controlX: root.rounding
-        controlY: 0
-    }
-
-    PathLine {
-        relativeX: 0
-        relativeY: root.wrapper.height - root.roundingY * 2
     }
 
     PathArc {
@@ -66,22 +77,25 @@ ShapePath {
         direction: PathArc.Counterclockwise
     }
 
+    // Up the body's right side, then mirror the flare for the top-right corner.
     PathLine {
-        relativeX: root.wrapper.width - root.rounding * 2
-        relativeY: 0
+        relativeX: 0
+        relativeY: -(root.wrapper.height - root.roundingY)
     }
 
     PathArc {
-        relativeX: -root.rounding
+        relativeX: root.flare
         relativeY: root.roundingY
-        radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
+        radiusX: root.flare
+        radiusY: Math.min(root.roundingY, root.wrapper.height)
         direction: PathArc.Counterclockwise
     }
 
+    // Back up the outer edge of the right flare; closing the path draws the
+    // top edge.
     PathLine {
         relativeX: 0
-        relativeY: -(root.wrapper.height - root.roundingY * 2)
+        relativeY: -root.roundingY
     }
 
     Behavior on fillColor {
