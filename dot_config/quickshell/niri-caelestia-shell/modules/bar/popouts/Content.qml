@@ -78,6 +78,13 @@ Item {
         }
 
         Popout {
+            name: "brightness"
+            sourceComponent: BrightnessPopout {
+                wrapper: root.wrapper
+            }
+        }
+
+        Popout {
             name: "kblayout"
             source: "KbLayout.qml"
         }
@@ -85,6 +92,13 @@ Item {
         Popout {
             name: "lockstatus"
             source: "LockStatus.qml"
+        }
+
+        Popout {
+            name: "trayDropdown"
+            sourceComponent: TrayDropdown {
+                popouts: root.wrapper
+            }
         }
 
         Repeater {

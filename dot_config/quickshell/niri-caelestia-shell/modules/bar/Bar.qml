@@ -68,17 +68,21 @@ Item {
             const items = item.items;
             const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
             if (icon) {
-                popouts.currentName = icon.name;
+                // The mic icon shares the audio popout; brightness has its own
+                popouts.currentName = icon.name === "microphone" ? "audio" : icon.name;
                 popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, icon.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
+            } else if (!sticky) {
+                popouts.hasCurrent = false;
             }
         } else if (id === "tray") {
-            const index = Math.floor(((x - left) / itemWidth) * item.items.count);
-            const trayItem = item.items.itemAt(index);
-            if (trayItem) {
-                popouts.currentName = `traymenu${index}`;
-                popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, trayItem.implicitWidth / 2, 0).x);
+            // The tray is a single button that opens the dropdown popout
+            if (Config.bar.popouts.tray) {
+                popouts.currentName = "trayDropdown";
+                popouts.currentCenter = Qt.binding(() => item.mapToItem(root, item.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
+            } else if (!sticky) {
+                popouts.hasCurrent = false;
             }
         } else if (!sticky) {
             popouts.hasCurrent = false;
@@ -87,22 +91,39 @@ Item {
 
     function handleWheel(x: real, angleDelta: point): void {
         const ch = row.childAt(x, height / 2) as WrappedLoader;
-        if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
+        if (!ch?.item)
+            return;
+
+        if (ch.id === "workspaces" && Config.bar.scrollActions.workspaces) {
             Niri.switchToWorkspaceUpDown(angleDelta.y > 0 ? "up" : "down");
-        } else if (Config.bar.scrollActions.volume) {
-            if (angleDelta.y > 0)
-                Audio.incrementVolume();
-            else if (angleDelta.y < 0)
-                Audio.decrementVolume();
+        } else if (ch.id === "statusIcons") {
+            // Scrolling only adjusts volume/brightness when over their icons
+            const items = ch.item.items;
+            const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
+            if (icon?.name === "audio" && Config.bar.scrollActions.volume) {
+                if (angleDelta.y > 0)
+                    Audio.incrementVolume();
+                else if (angleDelta.y < 0)
+                    Audio.decrementVolume();
+            } else if (icon?.name === "brightness" && Config.bar.scrollActions.brightness) {
+                const monitor = ch.item.monitor;
+                if (monitor) {
+                    if (angleDelta.y > 0)
+                        monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
+                    else if (angleDelta.y < 0)
+                        monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
+                }
+            }
         }
     }
 
-    // True when the pointer is over the centred clock (opens the dashboard)
+    // True when the pointer is over the centred cluster (clock + now-playing)
+    // — hovering anywhere in that group opens the dashboard
     function clockHovered(mx: real, my: real): bool {
-        if (!clockLoader.item)
+        if (clockCluster.width <= 0 || clockCluster.height <= 0)
             return false;
-        const p = clockLoader.mapToItem(null, 0, 0);
-        return mx >= p.x && mx <= p.x + clockLoader.width && my >= p.y && my <= p.y + clockLoader.height;
+        const p = clockCluster.mapToItem(null, 0, 0);
+        return mx >= p.x && mx <= p.x + clockCluster.width && my >= p.y && my <= p.y + clockCluster.height;
     }
 
     RowLayout {
@@ -198,7 +219,9 @@ Item {
                 DelegateChoice {
                     roleValue: "statusIcons"
                     delegate: WrappedLoader {
-                        sourceComponent: StatusIcons {}
+                        sourceComponent: StatusIcons {
+                            screen: root.screen
+                        }
                     }
                 }
                 DelegateChoice {
@@ -219,18 +242,43 @@ Item {
         }
     }
 
-    // Centred clock overlay
-    Loader {
-        id: clockLoader
+    // Centred clock cluster: time + now-playing as one centred group
+    Item {
+        id: clockCluster
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        width: clockLoader.width + (nowPlayingLoader.width > 0 ? Appearance.spacing.lg : 0) + nowPlayingLoader.width
+        height: Math.max(nowPlayingLoader.height, clockLoader.height)
 
-        active: root.showClock
-        visible: active
-        asynchronous: true
+        Loader {
+            id: clockLoader
 
-        sourceComponent: Clock {}
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+
+            active: root.showClock
+            visible: active
+            asynchronous: true
+
+            sourceComponent: Clock {}
+        }
+
+        Loader {
+            id: nowPlayingLoader
+
+            anchors.left: clockLoader.right
+            anchors.leftMargin: nowPlayingLoader.width > 0 ? Appearance.spacing.lg : 0
+            anchors.verticalCenter: parent.verticalCenter
+
+            active: root.showClock && Config.bar.clock.showNowPlaying
+            visible: active
+            asynchronous: true
+
+            sourceComponent: NowPlayingStatus {
+                visibilities: root.visibilities
+            }
+        }
     }
 
     // Cached first/last enabled items — recomputed once when repeater changes

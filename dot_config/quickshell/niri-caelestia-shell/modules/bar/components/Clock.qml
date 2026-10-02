@@ -8,7 +8,7 @@ import QtQuick
 StyledRect {
     id: root
 
-    readonly property color colour: Colours.palette.m3tertiary
+    readonly property color colour: Colours.palette.m3primary
     readonly property int padding: Config.bar.clock.background ? Appearance.padding.normal : Appearance.padding.small
 
     implicitWidth: layout.implicitWidth + root.padding * 2
@@ -42,7 +42,7 @@ StyledRect {
             horizontalAlignment: StyledText.AlignHCenter
             text: Time.format("ddd d")
             font.pointSize: Appearance.font.size.smaller
-            font.family: Appearance.font.family.mono
+            font.family: Appearance.font.family.clock
             color: root.colour
         }
 
@@ -60,8 +60,9 @@ StyledRect {
 
             horizontalAlignment: StyledText.AlignHCenter
             text: Time.format(Config.services.useTwelveHourClock ? "hh:mm A" : "hh:mm")
-            font.pointSize: Appearance.font.size.smaller
-            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.larger
+            font.family: Appearance.font.family.clock
+            font.weight: Font.Medium
             color: root.colour
         }
     }
