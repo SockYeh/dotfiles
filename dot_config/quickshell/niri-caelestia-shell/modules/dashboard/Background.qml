@@ -17,8 +17,9 @@ ShapePath {
     readonly property real leftEdge: startX + rounding
     readonly property real rightEdge: leftEdge + wrapper.width
 
-    // The top corners flare outward into the wrapper's margin, so the panel
-    // reads as growing out of the bar instead of hanging below it.
+    // The top edge runs wider than the body, out to the wrapper's margin, so
+    // the panel reads as growing out of the bar instead of hanging below it.
+    // The margin is exactly one rounding wide, so the flare can't exceed it.
     readonly property real flare: rounding
 
     strokeWidth: -1
@@ -28,39 +29,37 @@ ShapePath {
     // cards that hold text are drawn as opaque boxes over it.
     fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
-    // Start at the outer edge of the top-left flare, which lines up with the
-    // wrapper's left border because startX is offset by one rounding.
+    // Start at the outer tip of the top-left flare.
     PathMove {
         x: root.leftEdge - root.flare
         y: 0
     }
 
-    // Outer edge of the left flare.
-    PathLine {
-        relativeX: 0
-        relativeY: root.roundingY
-    }
-
-    // Convex shoulder: curves back in to the body's left edge.
+    // Left shoulder: a concave cove. It leaves the tip sagging down-and-in,
+    // so the corner is scooped rather than bulged — the same inward curve the
+    // bottom corners use, just set out on the flare. Clockwise puts the arc's
+    // centre outside the fill, which is what makes it a cove; the other sweep
+    // balloons the shoulder out past the flare width.
     PathArc {
         relativeX: root.flare
-        relativeY: -root.roundingY
+        relativeY: root.roundingY
         radiusX: root.flare
-        radiusY: Math.min(root.roundingY, root.wrapper.height)
+        radiusY: root.roundingY
         direction: PathArc.Clockwise
     }
 
     // Down the body's left side to the bottom fillet.
     PathLine {
         relativeX: 0
-        relativeY: root.wrapper.height - root.roundingY
+        relativeY: root.wrapper.height - root.roundingY * 2
     }
 
+    // Bottom corners keep the original inward fillets.
     PathArc {
         relativeX: root.rounding
         relativeY: root.roundingY
         radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
+        radiusY: root.roundingY
         direction: PathArc.Counterclockwise
     }
 
@@ -73,31 +72,25 @@ ShapePath {
         relativeX: root.rounding
         relativeY: -root.roundingY
         radiusX: root.rounding
-        radiusY: Math.min(root.rounding, root.wrapper.height)
+        radiusY: root.roundingY
         direction: PathArc.Counterclockwise
     }
 
-    // Up the body's right side, then mirror the flare for the top-right corner.
+    // Up the body's right side to the mirrored shoulder.
     PathLine {
         relativeX: 0
-        relativeY: -(root.wrapper.height - root.roundingY)
+        relativeY: -(root.wrapper.height - root.roundingY * 2)
     }
 
     PathArc {
         relativeX: root.flare
-        relativeY: root.roundingY
-        radiusX: root.flare
-        radiusY: Math.min(root.roundingY, root.wrapper.height)
-        direction: PathArc.Counterclockwise
-    }
-
-    // Back up the outer edge of the right flare; closing the path draws the
-    // top edge.
-    PathLine {
-        relativeX: 0
         relativeY: -root.roundingY
+        radiusX: root.flare
+        radiusY: root.roundingY
+        direction: PathArc.Clockwise
     }
 
+    // Closing the path draws the top edge, spanning tip to tip.
     Behavior on fillColor {
         CAnim {}
     }
