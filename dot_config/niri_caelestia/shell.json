@@ -113,7 +113,7 @@
     "workspaces": {
       "shown": 4,
       "activeIndicator": true,
-      "occupiedBg": false,
+      "occupiedBg": true,
       "showWindows": false,
       "perMonitorWorkspaces": false,
       "windowIconImage": false,
