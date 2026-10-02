@@ -85,15 +85,21 @@ Variants {
                     // Body plus the wings, then carve it back to shape. Every
                     // Region in a boolean chain needs its own rect — an unset
                     // one is empty, so Subtract/Intersect would collapse.
+                    //
+                    // `intersection` on a node says how that node folds into
+                    // its *parent's* region, so the carves below carry Subtract
+                    // and this node stays a Combine. Putting Subtract here
+                    // instead subtracts the whole panel from the entire blur
+                    // region and leaves no frost at all.
                     x: dashBlur.bodyX - dashBlur.flare
                     y: dashBlur.bodyY
                     width: dashBlur.bodyW + dashBlur.flare * 2
                     height: panels.dashboard.height
                     radius: 0
-                    intersection: Intersection.Subtract
 
                     // Wings only exist in the top band; trim them off below it.
                     Region {
+                        intersection: Intersection.Subtract
                         x: dashBlur.bodyX - dashBlur.flare
                         y: dashBlur.bodyY + dashBlur.flare
                         width: dashBlur.flare
@@ -101,22 +107,26 @@ Variants {
                     }
 
                     Region {
+                        intersection: Intersection.Subtract
                         x: dashBlur.bodyX + dashBlur.bodyW
                         y: dashBlur.bodyY + dashBlur.flare
                         width: dashBlur.flare
                         height: panels.dashboard.height - dashBlur.flare
                     }
 
-                    // Top-left cove.
+                    // Top-left cove. This node's own rect is the clip that
+                    // keeps the ellipse to its top half; the ellipse child
+                    // intersects with it, and the node subtracts the result.
                     Region {
+                        intersection: Intersection.Subtract
                         x: dashBlur.bodyX - dashBlur.flare * 2
                         y: dashBlur.bodyY
                         width: dashBlur.flare * 4
                         height: dashBlur.flare
-                        intersection: Intersection.Intersect
 
                         Region {
                             shape: RegionShape.Ellipse
+                            intersection: Intersection.Intersect
                             x: dashBlur.bodyX - dashBlur.flare * 2
                             y: dashBlur.bodyY
                             width: dashBlur.flare * 2
@@ -126,14 +136,15 @@ Variants {
 
                     // Top-right cove, mirrored.
                     Region {
+                        intersection: Intersection.Subtract
                         x: dashBlur.bodyX + dashBlur.bodyW - dashBlur.flare * 2
                         y: dashBlur.bodyY
                         width: dashBlur.flare * 4
                         height: dashBlur.flare
-                        intersection: Intersection.Intersect
 
                         Region {
                             shape: RegionShape.Ellipse
+                            intersection: Intersection.Intersect
                             x: dashBlur.bodyX + dashBlur.bodyW
                             y: dashBlur.bodyY
                             width: dashBlur.flare * 2
