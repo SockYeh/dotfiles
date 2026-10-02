@@ -50,7 +50,7 @@ GridLayout {
     Rect {
         Layout.row: 1
         Layout.column: 1
-        Layout.columnSpan: 3
+        Layout.columnSpan: 4
         Layout.fillWidth: true
         Layout.preferredHeight: calendar.implicitHeight
 
@@ -58,17 +58,6 @@ GridLayout {
             id: calendar
 
             state: root.state
-        }
-    }
-
-    Rect {
-        Layout.row: 1
-        Layout.column: 4
-        Layout.preferredWidth: resources.implicitWidth
-        Layout.fillHeight: true
-
-        Resources {
-            id: resources
         }
     }
 
