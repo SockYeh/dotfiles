@@ -141,5 +141,49 @@ Item {
                 }
             }
         }
+
+        // Screen timeout on/off — 3 min blanking by default
+        StyledRect {
+            Layout.topMargin: Appearance.spacing.sm
+
+            implicitWidth: timeoutBtn.implicitWidth + Appearance.padding.md * 2
+            implicitHeight: timeoutBtn.implicitHeight + Appearance.padding.xs
+
+            radius: Appearance.rounding.normal
+            color: ScreenTimeout.enabled ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+
+            StateLayer {
+                color: ScreenTimeout.enabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+
+                function onClicked(): void {
+                    ScreenTimeout.toggle();
+                }
+            }
+
+            RowLayout {
+                id: timeoutBtn
+
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.sm
+
+                StyledText {
+                    Layout.leftMargin: Appearance.padding.sm
+                    text: qsTr("Screen timeout")
+                    color: ScreenTimeout.enabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                }
+
+                StyledText {
+                    text: ScreenTimeout.enabled ? `${Math.round(ScreenTimeout.timeoutSeconds / 60)} min` : qsTr("Off")
+                    color: ScreenTimeout.enabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3outline
+                    font.family: Appearance.font.family.mono
+                }
+
+                MaterialIcon {
+                    Layout.rightMargin: Appearance.padding.sm
+                    text: ScreenTimeout.enabled ? "timer" : "timer_off"
+                    color: ScreenTimeout.enabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                }
+            }
+        }
     }
 }

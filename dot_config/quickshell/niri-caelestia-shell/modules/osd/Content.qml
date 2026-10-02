@@ -27,29 +27,33 @@ Item {
         spacing: Appearance.spacing.lg
 
         // Speaker volume
-        CustomMouseArea {
-            implicitWidth: Config.osd.sizes.sliderWidth
-            implicitHeight: Config.osd.sizes.sliderHeight
+        WrappedLoader {
+            shouldBeActive: root.visibilities.osdMode === "volume"
 
-            function onWheel(event: WheelEvent) {
-                if (event.angleDelta.y > 0)
-                    Audio.incrementVolume();
-                else if (event.angleDelta.y < 0)
-                    Audio.decrementVolume();
-            }
+            sourceComponent: CustomMouseArea {
+                implicitWidth: Config.osd.sizes.sliderWidth
+                implicitHeight: Config.osd.sizes.sliderHeight
 
-            FilledSlider {
-                anchors.fill: parent
+                function onWheel(event: WheelEvent) {
+                    if (event.angleDelta.y > 0)
+                        Audio.incrementVolume();
+                    else if (event.angleDelta.y < 0)
+                        Audio.decrementVolume();
+                }
 
-                icon: Icons.getVolumeIcon(value, Audio.muted)
-                value: Audio.volume
-                onMoved: Audio.setVolume(value)
+                FilledSlider {
+                    anchors.fill: parent
+
+                    icon: Icons.getVolumeIcon(value, Audio.muted)
+                    value: Audio.volume
+                    onMoved: Audio.setVolume(value)
+                }
             }
         }
 
         // Microphone volume
         WrappedLoader {
-            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
+            shouldBeActive: Config.osd.enableMicrophone && root.visibilities.osdMode === "mic"
 
             sourceComponent: CustomMouseArea {
                 implicitWidth: Config.osd.sizes.sliderWidth
@@ -74,7 +78,7 @@ Item {
 
         // Brightness
         WrappedLoader {
-            shouldBeActive: Config.osd.enableBrightness
+            shouldBeActive: Config.osd.enableBrightness && root.visibilities.osdMode === "brightness"
 
             sourceComponent: CustomMouseArea {
                 implicitWidth: Config.osd.sizes.sliderWidth
@@ -85,9 +89,9 @@ Item {
                     if (!monitor)
                         return;
                     if (event.angleDelta.y > 0)
-                        monitor.setBrightness(monitor.brightness + 0.1);
+                        monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
                     else if (event.angleDelta.y < 0)
-                        monitor.setBrightness(monitor.brightness - 0.1);
+                        monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
                 }
 
                 FilledSlider {

@@ -7,7 +7,9 @@ JsonObject {
     property bool useTwelveHourClock: Qt.locale().timeFormat(Locale.ShortFormat).toLowerCase().includes("a")
     property string gpuType: ""
     property int visualiserBars: 24
-    property real audioIncrement: 0.1
+    property real audioIncrement: 0.05
+    property real brightnessIncrement: 0.1
+    property int screenTimeoutSeconds: 180 // Blank the display after this many idle seconds (0 disables)
     property bool smartScheme: true
     property string defaultPlayer: "Spotify"
     property list<var> playerAliases: [

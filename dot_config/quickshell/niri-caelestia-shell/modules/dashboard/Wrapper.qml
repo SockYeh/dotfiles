@@ -31,9 +31,21 @@ Item {
         }
     }
 
+    // Forget the selected tab whenever the dashboard is left, so every
+    // reopen starts on Overview (no tab persists across opens).
+    Connections {
+        target: root.visibilities
+
+        function onDashboardChanged(): void {
+            if (!root.visibilities.dashboard)
+                root.state.currentTab = 0;
+        }
+    }
+
     visible: height > 0
     implicitHeight: 0
     implicitWidth: content.implicitWidth
+
 
     states: [
         State {

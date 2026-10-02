@@ -225,12 +225,14 @@ Singleton {
                 showWifi: bar.status.showWifi,
                 showBluetooth: bar.status.showBluetooth,
                 showBattery: bar.status.showBattery,
-                showLockStatus: bar.status.showLockStatus
+                showLockStatus: bar.status.showLockStatus,
+                showBrightness: bar.status.showBrightness
             },
             clock: {
                 background: bar.clock.background,
                 showDate: bar.clock.showDate,
-                showIcon: bar.clock.showIcon
+                showIcon: bar.clock.showIcon,
+                showNowPlaying: bar.clock.showNowPlaying
             },
             popouts: {
                 tray: bar.popouts.tray,
@@ -424,6 +426,8 @@ Singleton {
             gpuType: services.gpuType,
             visualiserBars: services.visualiserBars,
             audioIncrement: services.audioIncrement,
+            brightnessIncrement: services.brightnessIncrement,
+            screenTimeoutSeconds: services.screenTimeoutSeconds,
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,
             playerAliases: services.playerAliases,

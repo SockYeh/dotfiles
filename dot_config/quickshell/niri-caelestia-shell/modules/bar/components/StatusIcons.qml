@@ -13,6 +13,9 @@ import QtQuick.Layouts
 StyledRect {
     id: root
 
+    required property ShellScreen screen
+
+    readonly property var monitor: Brightness.getMonitorForScreen(screen)
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconRow
 
@@ -100,21 +103,32 @@ StyledRect {
             }
         }
 
-        // Audio icon
+        // Audio icon + current volume
         WrappedLoader {
             name: "audio"
             active: Config.bar.status.showAudio
 
-            sourceComponent: MaterialIcon {
-                animate: true
-                text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-                color: root.colour
+            sourceComponent: RowLayout {
+                spacing: Appearance.spacing.small
+
+                MaterialIcon {
+                    animate: false
+                    text: "volume_up"
+                    color: root.colour
+                }
+
+                StyledText {
+                    animate: true
+                    text: `${Math.round(Audio.volume * 100)}%`
+                    color: root.colour
+                    font.family: Appearance.font.family.mono
+                }
             }
         }
 
         // Microphone icon
         WrappedLoader {
-            name: "audio"
+            name: "microphone"
             active: Config.bar.status.showMicrophone
 
             sourceComponent: MaterialIcon {
@@ -159,7 +173,7 @@ StyledRect {
             sourceComponent: RowLayout {
                 spacing: Appearance.spacing.md / 2
 
-                // Bluetooth icon
+                // Bluetooth icon (devices are in the popout dropdown)
                 MaterialIcon {
                     animate: true
                     text: {
@@ -171,47 +185,33 @@ StyledRect {
                     }
                     color: root.colour
                 }
-
-                // Connected bluetooth devices
-                Repeater {
-                    model: ScriptModel {
-                        values: Bluetooth.devices.values.filter(d => d.state !== BluetoothDeviceState.Disconnected)
-                    }
-
-                    MaterialIcon {
-                        id: device
-
-                        required property BluetoothDevice modelData
-
-                        animate: true
-                        text: Icons.getBluetoothIcon(modelData.icon)
-                        color: root.colour
-                        fill: 1
-
-                        SequentialAnimation on opacity {
-                            running: device.modelData.state !== BluetoothDeviceState.Connected
-                            alwaysRunToEnd: true
-                            loops: Animation.Infinite
-
-                            Anim {
-                                from: 1
-                                to: 0
-                                duration: Appearance.anim.durations.large
-                                easing.bezierCurve: Appearance.anim.curves.standardAccel
-                            }
-                            Anim {
-                                from: 0
-                                to: 1
-                                duration: Appearance.anim.durations.large
-                                easing.bezierCurve: Appearance.anim.curves.standardDecel
-                            }
-                        }
-                    }
-                }
             }
 
             Behavior on Layout.preferredWidth {
                 Anim {}
+            }
+        }
+
+        // Brightness icon + current level
+        WrappedLoader {
+            name: "brightness"
+            active: Config.bar.status.showBrightness
+
+            sourceComponent: RowLayout {
+                spacing: Appearance.spacing.small
+
+                MaterialIcon {
+                    animate: false
+                    text: "brightness_high"
+                    color: root.colour
+                }
+
+                StyledText {
+                    animate: true
+                    text: `${Math.round((root.monitor?.brightness ?? 0.5) * 100)}%`
+                    color: root.colour
+                    font.family: Appearance.font.family.mono
+                }
             }
         }
 

@@ -73,6 +73,10 @@ CustomMouseArea {
     onPressed: event => {
         dragStart = Qt.point(event.x, event.y);
         draggingBar = dragStart.y < bar.implicitHeight;
+
+        // Clicking anywhere outside the launcher closes it
+        if (visibilities.launcher && !inBottomPanel(panels.launcher, event.x, event.y))
+            visibilities.launcher = false;
     }
 
     onReleased: event => {
@@ -107,6 +111,11 @@ CustomMouseArea {
 
     onPositionChanged: event => {
         if (popouts.isDetached)
+            return;
+
+        // The launcher takes full input while open (for click-outside close);
+        // freeze hover-driven toggles so nothing else pops up over it.
+        if (visibilities.launcher)
             return;
 
         const x = event.x;

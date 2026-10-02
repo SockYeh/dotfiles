@@ -217,10 +217,16 @@ Singleton {
             if (sub.id === id)
                 return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
 
+        // Quickshell icon-provider URLs are already resolved (including
+        // "?path=" variants for absolute-path icons) — pass them through
+        // untouched rather than mangling them into invalid file:// URLs.
+        if (icon.startsWith("image://"))
+            return icon;
+
         if (icon.includes("?path=")) {
             const [name, path] = icon.split("?path=");
             icon = `file://${path}/${name.slice(name.lastIndexOf("/") + 1)}`;
-        } else if (icon !== "" && !icon.startsWith("/") && !icon.startsWith("file://") && !icon.startsWith("image://")) {
+        } else if (icon !== "" && !icon.startsWith("/") && !icon.startsWith("file://")) {
             icon = Quickshell.iconPath(icon);
         }
         return icon;

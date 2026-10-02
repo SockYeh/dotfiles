@@ -11,7 +11,8 @@ Scope {
     required property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(screen)
 
-    function show(): void {
+    function show(mode: string): void {
+        root.visibilities.osdMode = mode;
         root.visibilities.osd = true;
         timer.restart();
     }
@@ -20,11 +21,19 @@ Scope {
         target: Audio
 
         function onMutedChanged(): void {
-            root.show();
+            root.show("volume");
         }
 
         function onVolumeChanged(): void {
-            root.show();
+            root.show("volume");
+        }
+
+        function onSourceMutedChanged(): void {
+            root.show("mic");
+        }
+
+        function onSourceVolumeChanged(): void {
+            root.show("mic");
         }
     }
 
@@ -32,7 +41,7 @@ Scope {
         target: root.monitor
 
         function onBrightnessChanged(): void {
-            root.show();
+            root.show("brightness");
         }
     }
 

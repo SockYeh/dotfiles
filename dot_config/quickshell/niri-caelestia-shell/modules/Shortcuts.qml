@@ -140,3 +140,5 @@ Scope {
         }
     }
 }
+
+// keybind-ipc-wallpaper 1790887284

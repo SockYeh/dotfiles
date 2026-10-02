@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.services
 import qs.config
@@ -7,60 +9,34 @@ import QtQuick
 StyledRect {
     id: root
 
-    readonly property alias items: items
+    // Single button; all tray items live in the trayDropdown popout
+    readonly property alias button: button
 
     clip: true
     visible: width > 0 && height > 0 // To avoid warnings about being visible with no size
 
-    implicitWidth: layout.implicitWidth + (Config.bar.tray.background ? Appearance.padding.md : Appearance.padding.xs) * 2
+    readonly property int pad: Config.bar.tray.background ? Appearance.padding.md : Appearance.padding.xs
+
+    implicitWidth: SystemTray.items.values.length > 0 ? icon.implicitWidth + pad * 2 : 0
     implicitHeight: Config.bar.sizes.innerWidth
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.tray.background ? Colours.tPalette.m3surfaceContainer.a : 0)
     radius: Appearance.rounding.full
 
-    Row {
-        id: layout
+    MouseArea {
+        id: button
 
-        anchors.centerIn: parent
-        spacing: Appearance.spacing.sm
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
 
-        add: Transition {
-            Anim {
-                properties: "scale"
-                from: 0
-                to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
-            }
-        }
+        MaterialIcon {
+            id: icon
 
-        move: Transition {
-            Anim {
-                properties: "scale"
-                to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
-            }
-            Anim {
-                properties: "x,y"
-            }
-        }
+            anchors.centerIn: parent
 
-        Repeater {
-            id: items
-
-            model: SystemTray.items
-            TrayItem {}
-        }
-    }
-
-    Behavior on implicitWidth {
-        Anim {
-            easing.bezierCurve: Appearance.anim.curves.emphasized
-        }
-    }
-
-    Behavior on implicitHeight {
-        Anim {
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+            animate: true
+            text: "expand_more"
+            color: Colours.palette.m3secondary
         }
     }
 }

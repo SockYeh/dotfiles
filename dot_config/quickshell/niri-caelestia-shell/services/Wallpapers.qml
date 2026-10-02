@@ -186,6 +186,17 @@ Searcher {
         function list(): string {
             return root.list.map(w => w.path).join("\n");
         }
+
+        // Opens the launcher directly in wallpaper-select mode (keybind)
+        function toggle(): void {
+            const visibilities = Visibilities.getForActive()
+            if (visibilities.launcher) {
+                visibilities.launcher = false
+            } else {
+                visibilities.wallpaperRequested = true
+                visibilities.launcher = true
+            }
+        }
     }
 
     // Create state directory, then write wallpaper path via FileView

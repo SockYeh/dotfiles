@@ -94,7 +94,7 @@
       }
     },
     "visualiser": {
-      "enabled": true,
+      "enabled": false,
       "autoHide": true,
       "blur": false,
       "rounding": 1,
@@ -150,12 +150,14 @@
       "showWifi": true,
       "showBluetooth": true,
       "showBattery": true,
-      "showLockStatus": false
+      "showLockStatus": false,
+      "showBrightness": true
     },
     "clock": {
       "background": false,
       "showDate": false,
-      "showIcon": false
+      "showIcon": false,
+      "showNowPlaying": true
     },
     "popouts": {
       "tray": true,
@@ -171,19 +173,7 @@
     "entries": [
       {
         "enabled": true,
-        "id": "logo"
-      },
-      {
-        "enabled": true,
         "id": "workspaces"
-      },
-      {
-        "enabled": true,
-        "id": "tray"
-      },
-      {
-        "enabled": true,
-        "id": "divider"
       },
       {
         "enabled": true,
@@ -199,11 +189,15 @@
       },
       {
         "enabled": true,
+        "id": "statusIcons"
+      },
+      {
+        "enabled": true,
         "id": "divider"
       },
       {
         "enabled": true,
-        "id": "statusIcons"
+        "id": "tray"
       },
       {
         "enabled": true,
@@ -263,7 +257,7 @@
   },
   "launcher": {
     "enabled": true,
-    "showOnHover": true,
+    "showOnHover": false,
     "maxShown": 8,
     "maxWallpapers": 9,
     "specialPrefix": "@",
@@ -389,7 +383,8 @@
     "useTwelveHourClock": false,
     "gpuType": "",
     "visualiserBars": 24,
-    "audioIncrement": 0.1,
+    "audioIncrement": 0.05,
+    "brightnessIncrement": 0.1,
     "smartScheme": true,
     "defaultPlayer": "Spotify",
     "playerAliases": [
@@ -401,10 +396,11 @@
     "toasts": {
       "configLoaded": true,
       "configError": true
-    }
+    },
+    "screenTimeoutSeconds": 180
   },
   "paths": {
-    "wallpaperDir": "/home/sockyeh/Pictures/Wallpapers",
+    "wallpaperDir": "/home/sockyeh/Pictures",
     "wallpaper": "",
     "sessionGif": "root:/assets/kurukuru.gif",
     "mediaGif": "root:/assets/bongocat.gif"

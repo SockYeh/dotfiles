@@ -34,8 +34,10 @@ Variants {
             mask: Region {
                 x: Config.border.thickness
                 y: bar.implicitHeight
-                width: win.width - Config.border.thickness * 2
-                height: win.height - bar.implicitHeight - Config.border.thickness
+                // While the launcher is open, take input everywhere so clicks
+                // outside it reach the shell and close it.
+                width: visibilities.launcher ? 0 : win.width - Config.border.thickness * 2
+                height: visibilities.launcher ? 0 : win.height - bar.implicitHeight - Config.border.thickness
                 intersection: Intersection.Xor
 
                 regions: regions.instances
@@ -99,12 +101,15 @@ Variants {
 
                 property bool bar
                 property bool osd
+                // Which OSD to show: "volume", "mic" or "brightness"
+                property string osdMode: "volume"
                 property bool nowPlaying
                 property bool session
                 property bool launcher
                 property bool dashboard
                 property bool utilities
                 property bool clipboardRequested
+                property bool wallpaperRequested
                 property bool quicktoggles
                 property bool keybinds
                 property bool editingWeatherLocation

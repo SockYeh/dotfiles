@@ -15,19 +15,7 @@ JsonObject {
 
     property list<var> entries: [
         {
-            id: "logo",
-            enabled: true
-        },
-        {
             id: "workspaces",
-            enabled: true
-        },
-        {
-            id: "tray",
-            enabled: true
-        },
-        {
-            id: "divider",
             enabled: true
         },
         {
@@ -43,11 +31,15 @@ JsonObject {
             enabled: true
         },
         {
+            id: "statusIcons",
+            enabled: true
+        },
+        {
             id: "divider",
             enabled: true
         },
         {
-            id: "statusIcons",
+            id: "tray",
             enabled: true
         },
         {
@@ -106,7 +98,7 @@ JsonObject {
     }
 
     component Status: JsonObject {
-        property bool showAudio: false
+        property bool showAudio: true
         property bool showMicrophone: false
         property bool showKbLayout: false
         property bool showNetwork: true
@@ -114,12 +106,14 @@ JsonObject {
         property bool showBluetooth: true
         property bool showBattery: true
         property bool showLockStatus: true
+        property bool showBrightness: true
     }
 
     component Clock: JsonObject {
         property bool background: false
         property bool showDate: true
         property bool showIcon: true
+        property bool showNowPlaying: true
     }
 
     component Popouts: JsonObject {
