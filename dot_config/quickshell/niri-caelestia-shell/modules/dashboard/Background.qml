@@ -18,9 +18,11 @@ ShapePath {
     readonly property real rightEdge: leftEdge + wrapper.width
 
     strokeWidth: -1
-    // Slightly see-through so the desktop behind bleeds through; the drawers
-    // group already applies transparency.base on top of this.
-    fillColor: Qt.alpha(Colours.palette.m3surface, 0.8)
+    // Frosted base: mostly see-through so the compositor's blur behind the
+    // panel reads through instead of being hidden under an opaque plate.
+    // The drawers group applies transparency.base on top of this, and the
+    // cards that hold text are drawn as opaque boxes over it.
+    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
     // Square top edge: the panel butts straight up against the bar strip so
     // the two read as one continuous base instead of a flared "connector".

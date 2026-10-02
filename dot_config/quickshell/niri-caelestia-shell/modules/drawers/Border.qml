@@ -16,10 +16,10 @@ Item {
 
     StyledRect {
         anchors.fill: parent
-        // Same base as the dashboard panel: a touch of translucency (the
-        // drawers group multiplies this by transparency.base) so the blur
-        // behind the bar strip reads through.
-        color: Qt.alpha(Colours.palette.m3surface, 0.8)
+        // Frosted base: mostly see-through so whatever the compositor blurred
+        // behind the bar actually reads. The drawers group multiplies this by
+        // transparency.base on top; text sits in its own opaque boxes.
+        color: Qt.alpha(Colours.palette.m3surface, 0.4)
 
         layer.enabled: root.visible
         layer.effect: MultiEffect {
