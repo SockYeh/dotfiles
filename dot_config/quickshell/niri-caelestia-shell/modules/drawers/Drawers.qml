@@ -70,10 +70,12 @@ Variants {
                 // is the top half of an ellipse centred on the body's top
                 // corner — exactly the curve the fill's shoulder arc draws.
                 //
-                // This has to track the fill precisely. If the blur is merely a
-                // rectangle, its edge reads as the panel's edge and the flare
-                // disappears; if it reaches past the body lower down, it leaves
-                // bright strips down both sides.
+                // This has to track the fill precisely, on every edge. If the
+                // blur is merely a rectangle, its edge reads as the panel's
+                // edge and the flare disappears; if it reaches past the body
+                // lower down it leaves bright strips down the sides; if the
+                // bottom corners are square while the fill rounds them, the
+                // frost squares off the fill's rounding.
                 Region {
                     id: dashBlur
 
@@ -82,36 +84,29 @@ Variants {
                     readonly property int bodyY: panels.dashboard.y + bar.implicitHeight
                     readonly property int bodyW: panels.dashboard.width
 
-                    // Body plus the wings, then carve it back to shape. Every
-                    // Region in a boolean chain needs its own rect — an unset
-                    // one is empty, so Subtract/Intersect would collapse.
+                    // The body is the base rect, so the wings only ever exist
+                    // in the top band added below. Bottom corners round off to
+                    // match the fill; the top corners are left square because
+                    // the cove bites carve them.
                     //
-                    // `intersection` on a node says how that node folds into
-                    // its *parent's* region, so the carves below carry Subtract
-                    // and this node stays a Combine. Putting Subtract here
-                    // instead subtracts the whole panel from the entire blur
-                    // region and leaves no frost at all.
-                    x: dashBlur.bodyX - dashBlur.flare
+                    // Every Region in a boolean chain needs its own rect — an
+                    // unset one is empty, so Subtract/Intersect would collapse.
+                    // And `intersection` says how a node folds into its
+                    // *parent's* region, so the carves carry Subtract while
+                    // this node and the band stay Combines.
+                    x: dashBlur.bodyX
                     y: dashBlur.bodyY
-                    width: dashBlur.bodyW + dashBlur.flare * 2
+                    width: dashBlur.bodyW
                     height: panels.dashboard.height
-                    radius: 0
+                    bottomLeftRadius: dashBlur.flare
+                    bottomRightRadius: dashBlur.flare
 
-                    // Wings only exist in the top band; trim them off below it.
+                    // Flared top band, running out to both tips.
                     Region {
-                        intersection: Intersection.Subtract
                         x: dashBlur.bodyX - dashBlur.flare
-                        y: dashBlur.bodyY + dashBlur.flare
-                        width: dashBlur.flare
-                        height: panels.dashboard.height - dashBlur.flare
-                    }
-
-                    Region {
-                        intersection: Intersection.Subtract
-                        x: dashBlur.bodyX + dashBlur.bodyW
-                        y: dashBlur.bodyY + dashBlur.flare
-                        width: dashBlur.flare
-                        height: panels.dashboard.height - dashBlur.flare
+                        y: dashBlur.bodyY
+                        width: dashBlur.bodyW + dashBlur.flare * 2
+                        height: dashBlur.flare
                     }
 
                     // Top-left cove. This node's own rect is the clip that
