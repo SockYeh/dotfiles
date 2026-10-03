@@ -4,11 +4,12 @@ import Quickshell
 import Quickshell.Wayland
 
 // Blur region shaped like the launcher's fill (Background.qml): the body with
-// its top fillets, plus the band that flares out along the bottom edge. The
-// band is what makes the flare read as a frosted extension — without it the
-// flare sits over sharp wallpaper while the body behind it is blurred. The
-// concave notch at each shoulder is left blurred rather than carved back out:
-// it is a thin crescent, and carving it left the flare itself unblurred.
+// its top fillets, the band that flares out along the bottom edge, and a cove
+// bite at each shoulder.
+//
+// The bites are the whole point: a blur region has hard edges, so without them
+// the band reads as a plain rectangle laid over the flare and hides the
+// concave scoop that gives the flare its shape.
 Region {
     id: root
 
@@ -35,5 +36,42 @@ Region {
         y: root.bodyY + root.bodyH - root.flare
         width: root.bodyW + root.flare * 2
         height: root.open ? root.flare : 0
+    }
+
+    // Bottom-left cove: this node's rect clips the ellipse to its bottom half,
+    // and the node subtracts the intersection.
+    Region {
+        intersection: Intersection.Subtract
+        x: root.bodyX - root.flare * 2
+        y: root.bodyY + root.bodyH - root.flare
+        width: root.flare * 4
+        height: root.open ? root.flare : 0
+
+        Region {
+            shape: RegionShape.Ellipse
+            intersection: Intersection.Intersect
+            x: root.bodyX - root.flare * 2
+            y: root.bodyY + root.bodyH - root.flare * 2
+            width: root.flare * 2
+            height: root.open ? root.flare * 2 : 0
+        }
+    }
+
+    // Bottom-right cove, mirrored.
+    Region {
+        intersection: Intersection.Subtract
+        x: root.bodyX + root.bodyW - root.flare * 2
+        y: root.bodyY + root.bodyH - root.flare
+        width: root.flare * 4
+        height: root.open ? root.flare : 0
+
+        Region {
+            shape: RegionShape.Ellipse
+            intersection: Intersection.Intersect
+            x: root.bodyX + root.bodyW
+            y: root.bodyY + root.bodyH - root.flare * 2
+            width: root.flare * 2
+            height: root.open ? root.flare * 2 : 0
+        }
     }
 }

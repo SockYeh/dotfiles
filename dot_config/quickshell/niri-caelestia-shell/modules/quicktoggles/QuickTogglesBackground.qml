@@ -62,21 +62,23 @@ ShapePath {
         direction: PathArc.Clockwise
     }
 
-    PathLine {
-        relativeX: root.wrapper.width - root.rounding
-        relativeY: 0
-    }
+    // Stop one flare short of the screen edge, then scoop up to the tip of
+        // the flare. The tip sits on the screen edge, so the flare runs *up*
+        // along it rather than out past it.
+        PathLine {
+            relativeX: root.wrapper.width - root.flare - root.rounding
+            relativeY: 0
+        }
 
-    // Concave cove up to the tip of the right flare, then straight back down
-    // the screen edge.
-    PathArc {
-        relativeX: root.rounding
-        relativeY: -root.flare
-        radiusX: root.rounding
-        radiusY: root.flare
-        direction: PathArc.Clockwise
-    }
+        PathArc {
+            relativeX: root.flare
+            relativeY: -root.flare
+            radiusX: root.flare
+            radiusY: root.flare
+            direction: PathArc.Clockwise
+        }
 
+    // Straight back down the screen edge, closing the path at the corner.
     PathLine {
         relativeX: 0
         relativeY: root.wrapper.height + root.flare
