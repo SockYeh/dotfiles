@@ -29,7 +29,12 @@ Item {
     Calendar {
         id: calendar
 
-        anchors.centerIn: parent
+        // Anchored to the edges, not centred: Calendar already anchors its own
+        // left and right, and adding horizontalCenter makes it fall back to
+        // implicitWidth (0), which collapses every row inside it.
+        anchors.top: parent.top
+        anchors.topMargin: Appearance.padding.xl
+
         state: root.state
     }
 }

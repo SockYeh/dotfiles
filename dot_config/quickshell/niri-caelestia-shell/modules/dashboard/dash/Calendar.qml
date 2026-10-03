@@ -70,10 +70,21 @@ CustomMouseArea {
             }
 
             Item {
+                id: monthYearHeader
+
                 Layout.fillWidth: true
 
                 implicitWidth: monthYearDisplay.implicitWidth + Appearance.padding.xs * 2
                 implicitHeight: monthYearDisplay.implicitHeight + Appearance.padding.xs * 2
+
+                readonly property bool onCurrentMonth: {
+                    const now = new Date();
+                    return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
+                }
+
+                function jumpToToday(): void {
+                    root.state.currentDate = new Date();
+                }
 
                 StateLayer {
                     anchors.fill: monthYearDisplay
@@ -82,13 +93,13 @@ CustomMouseArea {
                     anchors.rightMargin: -Appearance.padding.md
 
                     radius: Appearance.rounding.full
-                    disabled: {
-                        const now = new Date();
-                        return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
-                    }
+                    // Reached through the header rather than `root`: StateLayer
+                    // declares its own root, which shadows the calendar's inside
+                    // this instance.
+                    disabled: monthYearHeader.onCurrentMonth
 
                     function onClicked(): void {
-                        root.state.currentDate = new Date();
+                        monthYearHeader.jumpToToday();
                     }
                 }
 
