@@ -7,6 +7,8 @@ import qs.config
 import qs.modules.bar
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.dashboard
+import qs.modules.launcher as LauncherModule
+import qs.modules.quicktoggles as QuickTogglesModule
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -74,13 +76,13 @@ Variants {
                     bar: bar
                 }
 
-                // Launcher, notifications and the bar popouts share the same
-                // frosted fill, so the wallpaper behind them needs blurring too
-                // — without it their 0.4 tint just reads as a transparent
-                // sheet with sharp window content showing through.
-                Region {
-                    item: panels.launcher
-                    radius: Config.border.rounding
+                // Launcher and quick toggles carry the dashboard's flared silhouette,
+                // so their blur regions have to follow the fill out to the
+                // tips — otherwise the flare sits outside the blurred area
+                // and reads as tint smeared over sharp wallpaper.
+                LauncherModule.BlurRegion {
+                    launcher: panels.launcher
+                    bar: bar
                 }
 
                 Region {
@@ -94,10 +96,9 @@ Variants {
                     invertBottomRounding: panels.popouts.animY + panels.popouts.height + 1 >= panels.height
                 }
 
-                // Quick toggles, same frost.
-                Region {
-                    item: panels.quicktoggles
-                    radius: Config.border.rounding
+                QuickTogglesModule.BlurRegion {
+                    quicktoggles: panels.quicktoggles
+                    bar: bar
                 }
 
                 // No blur behind the toasts or the now-playing popup: they
