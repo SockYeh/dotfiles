@@ -144,8 +144,10 @@ Item {
         id: toasts
 
         width: implicitWidth
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        // Status toasts (caps lock, VPN, battery, ...) share the top-centre
+        // spot with the now playing popup.
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: Appearance.padding.md
     }
 

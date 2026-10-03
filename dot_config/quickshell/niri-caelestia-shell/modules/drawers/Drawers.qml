@@ -5,6 +5,7 @@ import qs.components.containers
 import qs.services
 import qs.config
 import qs.modules.bar
+import qs.modules.dashboard
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -48,104 +49,38 @@ Variants {
             anchors.left: true
             anchors.right: true
 
-            // Frosted glass behind the shell's own panels, using
-            // ext-background-effect-v1. One region per panel, so the bar strip
-            // and the dashboard share the same blurred base; panels with zero
-            // height (closed) collapse to an empty region.
+            // Frosted glass behind the shell's panels using
+            // ext-background-effect-v1. The bar strip is gone — it was a
+            // full-width frosted extension over the workspace. Blur now only
+            // carries over the dashboard, and its sub-regions are defined in
+            // modules/dashboard/BlurRegion.qml so those rectangles vanish
+            // when the panel is not on screen.
+            // The dashboard's fill lives with the dashboard because the
+            // region for it must collapse when the panel is not drawn.
             BackgroundEffect.blurRegion: Region {
                 Region {
-                    // Strip behind the bar — Border fills it, so blur it too.
+                    // Strip behind the bar backdrop.
                     x: 0
                     y: 0
                     width: win.width
                     height: bar.implicitHeight
                 }
 
-                // The dashboard's fill (modules/dashboard/Background.qml) is
-                // wider than the body at the very top — the top edge runs out
-                // to a tip either side and each shoulder is a concave cove back
-                // down to the body's edge. A Region is only ever a rect or an
-                // ellipse, so the same silhouette is built here as "body plus a
-                // flared top band, minus the two cove bites", where each bite
-                // is the top half of an ellipse centred on the body's top
-                // corner — exactly the curve the fill's shoulder arc draws.
-                //
-                // This has to track the fill precisely, on every edge. If the
-                // blur is merely a rectangle, its edge reads as the panel's
-                // edge and the flare disappears; if it reaches past the body
-                // lower down it leaves bright strips down the sides; if the
-                // bottom corners are square while the fill rounds them, the
-                // frost squares off the fill's rounding.
+                BlurRegion {
+                    dashboard: panels.dashboard
+                    bar: bar
+                }
+
+                // Launcher and notifications share the same frosted fill, so
+                // both need the wallpaper behind them blurred too.
                 Region {
-                    id: dashBlur
+                    item: panels.launcher
+                    radius: Config.border.rounding
+                }
 
-                    readonly property int flare: Config.border.rounding
-                    readonly property int bodyX: panels.dashboard.x + Config.border.thickness
-                    readonly property int bodyY: panels.dashboard.y + bar.implicitHeight
-                    readonly property int bodyW: panels.dashboard.width
-
-                    // The body is the base rect, so the wings only ever exist
-                    // in the top band added below. Bottom corners round off to
-                    // match the fill; the top corners are left square because
-                    // the cove bites carve them.
-                    //
-                    // Every Region in a boolean chain needs its own rect — an
-                    // unset one is empty, so Subtract/Intersect would collapse.
-                    // And `intersection` says how a node folds into its
-                    // *parent's* region, so the carves carry Subtract while
-                    // this node and the band stay Combines.
-                    x: dashBlur.bodyX
-                    y: dashBlur.bodyY
-                    width: dashBlur.bodyW
-                    height: panels.dashboard.height
-                    bottomLeftRadius: dashBlur.flare
-                    bottomRightRadius: dashBlur.flare
-
-                    // Flared top band, running out to both tips.
-                    Region {
-                        x: dashBlur.bodyX - dashBlur.flare
-                        y: dashBlur.bodyY
-                        width: dashBlur.bodyW + dashBlur.flare * 2
-                        height: dashBlur.flare
-                    }
-
-                    // Top-left cove. This node's own rect is the clip that
-                    // keeps the ellipse to its top half; the ellipse child
-                    // intersects with it, and the node subtracts the result.
-                    Region {
-                        intersection: Intersection.Subtract
-                        x: dashBlur.bodyX - dashBlur.flare * 2
-                        y: dashBlur.bodyY
-                        width: dashBlur.flare * 4
-                        height: dashBlur.flare
-
-                        Region {
-                            shape: RegionShape.Ellipse
-                            intersection: Intersection.Intersect
-                            x: dashBlur.bodyX - dashBlur.flare * 2
-                            y: dashBlur.bodyY
-                            width: dashBlur.flare * 2
-                            height: dashBlur.flare * 2
-                        }
-                    }
-
-                    // Top-right cove, mirrored.
-                    Region {
-                        intersection: Intersection.Subtract
-                        x: dashBlur.bodyX + dashBlur.bodyW - dashBlur.flare * 2
-                        y: dashBlur.bodyY
-                        width: dashBlur.flare * 4
-                        height: dashBlur.flare
-
-                        Region {
-                            shape: RegionShape.Ellipse
-                            intersection: Intersection.Intersect
-                            x: dashBlur.bodyX + dashBlur.bodyW
-                            y: dashBlur.bodyY
-                            width: dashBlur.flare * 2
-                            height: dashBlur.flare * 2
-                        }
-                    }
+                Region {
+                    item: panels.notifications
+                    radius: Config.border.rounding
                 }
             }
 
@@ -187,9 +122,6 @@ Variants {
                     shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
                 }
 
-                Border {
-                    bar: bar
-                }
 
                 Backgrounds {
                     panels: panels

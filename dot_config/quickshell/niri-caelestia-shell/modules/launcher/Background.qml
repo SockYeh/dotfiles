@@ -13,7 +13,7 @@ ShapePath {
     readonly property real roundingY: flatten ? wrapper.height / 2 : rounding
 
     strokeWidth: -1
-    fillColor: Colours.palette.m3surface
+    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
     PathArc {
         relativeX: root.rounding

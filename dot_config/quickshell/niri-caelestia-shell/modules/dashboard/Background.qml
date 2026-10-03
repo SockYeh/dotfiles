@@ -27,7 +27,8 @@ ShapePath {
     // panel reads through instead of being hidden under an opaque plate.
     // The drawers group applies transparency.base on top of this, and the
     // cards that hold text are drawn as opaque boxes over it.
-    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
+    // Match the bar's frosted look: no extra tint, just the compositor blur.
+    fillColor: "transparent"
 
     // Start at the outer tip of the top-left flare.
     PathMove {

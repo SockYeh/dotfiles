@@ -15,7 +15,7 @@ ShapePath {
     property real fullHeightRounding: wrapper.height >= QsWindow.window?.height - Config.border.thickness * 2 ? -rounding : rounding
 
     strokeWidth: -1
-    fillColor: Colours.palette.m3surface
+    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
 
     PathLine {
         relativeX: -(root.wrapper.width + root.rounding)
