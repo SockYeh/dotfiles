@@ -103,6 +103,44 @@ Singleton {
         };
     }
 
+    // Total power in watts across every power supply the shell can read: the
+    // battery's draw on battery, or a USB-C input's draw when plugged in.
+// intel-rapl would be more precise for the package, but its counter is
+    // root-only on most kernels, so this is what actually reads back.
+    property real watts
+
+    Process {
+        id: powerProc
+
+        // One line per supply in microwatts: current_now (µA) x voltage_now
+        // (µV). Kept in µW so sub-watt draws survive the shell's integer maths;
+        // the conversion to watts happens below.
+        command: ["sh", "-c", "for f in /sys/class/power_supply/*/current_now; do d=${f%/current_now}; v=$(cat $d/voltage_now 2>/dev/null) || continue; [ -n \"$v\" ] || continue; echo $(( $(cat $f 2>/dev/null) * v )); done 2>/dev/null"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let total = 0;
+                for (const line of this.text.split("\n")) {
+                    const microwatts = parseFloat(line);
+                    // Signed drivers differ on which way is discharge; the
+                    // magnitude is what a wattage readout wants.
+                    if (!isNaN(microwatts))
+                        total += Math.abs(microwatts);
+                }
+                root.watts = total / 1e6;
+            }
+        }
+    }
+
+    Timer {
+        running: root.refCount > 0 && !powerProc.running
+        interval: Config.dashboard.resourceUpdateInterval
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: powerProc.running = true
+    }
+
     Timer {
         running: root.refCount > 0
         interval: Config.dashboard.resourceUpdateInterval

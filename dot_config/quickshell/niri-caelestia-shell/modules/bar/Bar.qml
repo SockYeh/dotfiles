@@ -81,6 +81,10 @@ Item {
             // No popout for the throughput pill; don't clear a sticky one
             if (!sticky)
                 popouts.hasCurrent = false;
+        } else if (id === "systemusage") {
+            // Same for the resource pill
+            if (!sticky)
+                popouts.hasCurrent = false;
         } else if (id === "tray") {
             // The tray is a single button that opens the dropdown popout
             if (Config.bar.popouts.tray) {
@@ -235,6 +239,12 @@ Item {
                     roleValue: "networkspeed"
                     delegate: WrappedLoader {
                         sourceComponent: NetworkSpeed {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "systemusage"
+                    delegate: WrappedLoader {
+                        sourceComponent: SystemUsage {}
                     }
                 }
                 DelegateChoice {

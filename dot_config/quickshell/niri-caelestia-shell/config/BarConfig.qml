@@ -19,6 +19,10 @@ JsonObject {
             enabled: true
         },
         {
+            id: "systemusage",
+            enabled: true
+        },
+        {
             id: "spacer",
             enabled: true
         },
