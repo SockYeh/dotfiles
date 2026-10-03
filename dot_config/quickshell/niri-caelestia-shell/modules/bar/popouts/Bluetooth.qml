@@ -109,6 +109,14 @@ ColumnLayout {
                 color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             }
 
+            // Battery percentage, not just the icon.
+            StyledText {
+                visible: device.modelData.state === BluetoothDeviceState.Connected && device.modelData.batteryAvailable // qmllint disable unresolved-type
+                text: qsTr("%1%").arg(Math.round(device.modelData.battery * 100))
+                color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                font.family: Appearance.font.family.mono
+            }
+
             StyledRect {
                 id: connectBtn
 

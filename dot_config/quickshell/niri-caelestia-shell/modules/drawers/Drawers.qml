@@ -71,8 +71,10 @@ Variants {
                     bar: bar
                 }
 
-                // Launcher and notifications share the same frosted fill, so
-                // both need the wallpaper behind them blurred too.
+                // Launcher, notifications and the bar popouts share the same
+                // frosted fill, so the wallpaper behind them needs blurring too
+                // — without it their 0.4 tint just reads as a transparent
+                // sheet with sharp window content showing through.
                 Region {
                     item: panels.launcher
                     radius: Config.border.rounding
@@ -80,6 +82,11 @@ Variants {
 
                 Region {
                     item: panels.notifications
+                    radius: Config.border.rounding
+                }
+
+                Region {
+                    item: panels.popouts
                     radius: Config.border.rounding
                 }
             }

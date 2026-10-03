@@ -36,6 +36,11 @@ CustomMouseArea {
 
     property bool draggingBar: false
 
+    // Drawers that reach up into the bar's strip. Opening one moves the
+    // pointer off the bar, which would otherwise collapse the bar out from
+    // under the panel that just opened.
+    readonly property bool drawerOverBar: visibilities.dashboard || visibilities.launcher || visibilities.session
+
     cursorShape: draggingBar && pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
@@ -105,10 +110,8 @@ CustomMouseArea {
 
             // Keep the bar shown while something anchored to it is open: a
             // popout (tray menus, etc.), or a drawer that reaches up into the
-            // bar's strip — the dashboard in particular, since opening it moves
-            // the pointer off the bar and used to collapse the bar underneath.
-            const drawerOverBar = visibilities.dashboard || visibilities.launcher || visibilities.session;
-            if (Config.bar.showOnHover && !popouts.hasCurrent && !drawerOverBar)
+            // bar's strip.
+            if (Config.bar.showOnHover && !popouts.hasCurrent && !root.drawerOverBar)
                 bar.isHovered = false;
         }
     }
@@ -220,8 +223,9 @@ CustomMouseArea {
         else if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword" && !inTopPanel(panels.popouts, x, y)) {
             popouts.hasCurrent = false;
             // The popout just closed and the pointer is off the bar, so the
-            // bar may collapse again.
-            if (Config.bar.showOnHover)
+            // bar may collapse again — unless a drawer sitting over the bar's
+            // strip is still open, like the dashboard.
+            if (Config.bar.showOnHover && !root.drawerOverBar)
                 bar.isHovered = false;
         }
     }
