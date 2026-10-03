@@ -14,7 +14,6 @@ import Quickshell.Io
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 
 Item {
     id: root
@@ -146,11 +145,29 @@ Item {
                 }
 
                 Toggle {
+                    id: vpnToggle
+
                     icon: "vpn_key"
                     checked: VPN.connected
-                    enabled: !VPN.connecting
+                    // `disabled`, not `enabled`: IconButton handles clicks in a
+                    // child StateLayer, and `enabled: false` on the button
+                    // kills input for the whole subtree.
+                    disabled: VPN.connecting
                     visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
                     onClicked: VPN.toggle()
+
+                    // Right click opens the exit node list (tailscale only).
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+
+                        onClicked: {
+                            if (!VPN.supportsExitNodes)
+                                return;
+
+                            exitNodeMenu.open();
+                        }
+                    }
                 }
 
                 Toggle {
@@ -165,6 +182,119 @@ Item {
             }
         }
 
+    }
+
+    // The picker belongs to the panel: close it when the panel goes away.
+    Connections {
+        target: root.visibilities
+
+        function onQuicktogglesChanged(): void {
+            if (!root.visibilities.quicktoggles)
+                exitNodeMenu.expanded = false;
+        }
+    }
+
+    // Exit node picker, opened by right clicking the VPN toggle. Styled like the
+    // bar popouts: same translucent fill and corner radius.
+    StyledRect {
+        id: exitNodeMenu
+
+        property bool expanded
+
+        // "No exit node" first, then whatever tailscale reports.
+        readonly property var nodes: [{ ip: "", name: qsTr("No exit node") }].concat(VPN.exitNodes)
+
+        function open(): void {
+            VPN.loadExitNodes();
+            expanded = true;
+
+            // Sit above the toggle, but keep the whole menu inside the panel:
+            // anchored on the toggle's left edge it ran off the screen edge.
+            const anchor = vpnToggle.mapToItem(root, 0, 0);
+            x = Math.max(Appearance.padding.md,
+                Math.min(anchor.x, root.width - width - Appearance.padding.md));
+            y = Math.max(Appearance.padding.md, anchor.y - height - Appearance.spacing.xs);
+        }
+
+        visible: expanded
+        opacity: expanded ? 1 : 0
+        z: 100
+
+        color: Qt.alpha(Colours.palette.m3surface, 0.4)
+        radius: Config.border.rounding
+
+        implicitWidth: exitNodeColumn.implicitWidth + Appearance.padding.xl * 2
+        implicitHeight: exitNodeColumn.implicitHeight + Appearance.padding.xl * 2
+
+        Behavior on opacity {
+            Anim {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+            }
+        }
+
+        ColumnLayout {
+            id: exitNodeColumn
+
+            anchors.centerIn: parent
+            spacing: 0
+
+            Repeater {
+                model: exitNodeMenu.nodes
+
+                delegate: StyledRect {
+                    id: nodeRow
+
+                    required property var modelData
+                    readonly property bool active: modelData.ip === VPN.currentExitNode
+
+                    // ColumnLayout sizes from implicitWidth/implicitHeight;
+                    // a plain Column left the rows at zero and the menu
+                    // collapsed to a sliver.
+                    Layout.fillWidth: true
+                    implicitWidth: nodeRowLayout.implicitWidth + Appearance.padding.md * 2
+                    implicitHeight: Appearance.spacing.xl * 2
+
+                    radius: Appearance.rounding.small
+                    color: active ? Colours.palette.m3secondaryContainer : "transparent"
+
+                    StateLayer {
+                        color: nodeRow.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        radius: nodeRow.radius
+
+                        function onClicked(): void {
+                            if (nodeRow.modelData.ip === "")
+                                VPN.clearExitNode();
+                            else
+                                VPN.setExitNode(nodeRow.modelData.ip);
+
+                            exitNodeMenu.expanded = false;
+                        }
+                    }
+
+                    RowLayout {
+                        id: nodeRowLayout
+
+                        anchors.fill: parent
+                        anchors.leftMargin: Appearance.padding.md
+                        anchors.rightMargin: Appearance.padding.md
+                        spacing: Appearance.spacing.sm
+
+                        MaterialIcon {
+                            Layout.alignment: Qt.AlignVCenter
+                            visible: nodeRow.active
+                            text: "check"
+                            color: Colours.palette.m3onSecondaryContainer
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: nodeRow.modelData.name
+                            color: nodeRow.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        }
+                    }
+                }
+            }
+        }
     }
 
     function openControlCenter(pane: string): void {

@@ -66,6 +66,26 @@ Scope {
     }
 
     IpcHandler {
+        target: "vpn"
+
+        function toggle(): void {
+            VPN.toggle();
+        }
+
+        function connect(): void {
+            VPN.connect();
+        }
+
+        function disconnect(): void {
+            VPN.disconnect();
+        }
+
+        function status(): string {
+            return `connected=${VPN.connected} connecting=${VPN.connecting} enabled=${VPN.enabled} provider=${VPN.providerName} exitNodes=${VPN.supportsExitNodes} nodes=${VPN.exitNodes.length} current=${VPN.currentExitNode}`;
+        }
+    }
+
+    IpcHandler {
         target: "toaster"
 
         function info(title: string, message: string, icon: string): void {
