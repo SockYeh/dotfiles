@@ -59,11 +59,13 @@ Variants {
             // region for it must collapse when the panel is not drawn.
             BackgroundEffect.blurRegion: Region {
                 Region {
-                    // Strip behind the bar backdrop.
+                    // Strip behind the bar backdrop. Collapsed while the bar is
+                    // down, otherwise its border.thickness height leaves a
+                    // blurred lip along the top of the screen.
                     x: 0
                     y: 0
                     width: win.width
-                    height: bar.implicitHeight
+                    height: bar.visible ? bar.implicitHeight : 0
                 }
 
                 BlurRegion {
