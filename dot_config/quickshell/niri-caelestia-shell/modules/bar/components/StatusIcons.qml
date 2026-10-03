@@ -68,7 +68,7 @@ Item {
 
             readonly property alias contentRow: systemRow
 
-            color: Colours.tPalette.m3surfaceContainer
+            color: Qt.alpha(Colours.palette.m3surface, 0.4)
             radius: Appearance.rounding.full
             clip: true
 
@@ -276,7 +276,7 @@ Item {
 
             readonly property alias contentRow: networkRow
 
-            color: Colours.tPalette.m3surfaceContainer
+            color: Qt.alpha(Colours.palette.m3surface, 0.4)
             radius: Appearance.rounding.full
             clip: true
 
@@ -323,16 +323,33 @@ Item {
                     active: Config.bar.status.showBluetooth
 
                     sourceComponent: RowLayout {
+                        id: bluetoothRow
+
                         spacing: Appearance.spacing.md / 2
+
+                        readonly property var connectedDevices: Bluetooth.devices.values.filter(d => d.connected)
 
                         MaterialIcon {
                             animate: true
                             text: {
                                 if (!Bluetooth.defaultAdapter?.enabled)
                                     return "bluetooth_disabled";
-                                if (Bluetooth.devices.values.some(d => d.connected))
+                                if (bluetoothRow.connectedDevices.length > 0)
                                     return "bluetooth_connected";
                                 return "bluetooth";
+                            }
+                            color: root.colour
+                        }
+
+                        StyledText {
+                            animate: false
+                            text: {
+                                if (!Bluetooth.defaultAdapter?.enabled)
+                                    return qsTr("Not Connected");
+                                const count = bluetoothRow.connectedDevices.length;
+                                if (count === 0)
+                                    return qsTr("Not Connected");
+                                return qsTr("Connected (%1)").arg(count);
                             }
                             color: root.colour
                         }

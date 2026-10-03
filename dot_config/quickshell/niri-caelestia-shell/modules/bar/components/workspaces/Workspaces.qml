@@ -22,7 +22,7 @@ StyledRect {
     implicitWidth: layout.implicitWidth + Appearance.padding.xs * 2
     implicitHeight: Config.bar.sizes.innerWidth
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Qt.alpha(Colours.palette.m3surface, 0.4)
     radius: Appearance.rounding.full
 
     signal requestWindowPopout

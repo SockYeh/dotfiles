@@ -291,7 +291,7 @@ Item {
         StyledRect {
             anchors.fill: parent
             anchors.margins: -Appearance.padding.xs
-            color: Colours.tPalette.m3surfaceContainer
+            color: Qt.alpha(Colours.palette.m3surface, 0.4)
             radius: Appearance.rounding.full
         }
 

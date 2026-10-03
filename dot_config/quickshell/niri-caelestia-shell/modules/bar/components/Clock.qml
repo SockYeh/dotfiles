@@ -14,7 +14,7 @@ StyledRect {
     implicitWidth: layout.implicitWidth + root.padding * 2
     implicitHeight: Config.bar.sizes.innerWidth
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
+    color: Qt.alpha(Colours.palette.m3surface, Config.bar.clock.background ? 0.4 : 0)
     radius: Appearance.rounding.full
 
     Row {

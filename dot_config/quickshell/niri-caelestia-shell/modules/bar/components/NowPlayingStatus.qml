@@ -39,7 +39,7 @@ Item {
         implicitWidth: root.artSize
         implicitHeight: root.artSize
         radius: Infinity
-        color: Colours.tPalette.m3surfaceContainerHigh
+        color: Qt.alpha(Colours.palette.m3surface, 0.4)
 
         // Shown until the track art loads over it
         MaterialIcon {

@@ -20,7 +20,7 @@ StyledRect {
     implicitWidth: SystemTray.items.values.length > 0 ? icon.implicitWidth + pad * 2 : 0
     implicitHeight: Config.bar.sizes.innerWidth
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.tray.background ? Colours.tPalette.m3surfaceContainer.a : 0)
+    color: Qt.alpha(Colours.palette.m3surface, Config.bar.tray.background ? 0.4 : 0)
     radius: Appearance.rounding.full
 
     MouseArea {

@@ -14,7 +14,7 @@ StyledRect {
 
     property color colour: Colours.palette.m3secondary
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Qt.alpha(Colours.palette.m3surface, 0.4)
     radius: Appearance.rounding.full
     clip: true
 
