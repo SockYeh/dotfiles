@@ -41,8 +41,8 @@ Item {
         }
 
         Tab {
-            iconName: "speed"
-            text: qsTr("System")
+            iconName: "calendar_month"
+            text: qsTr("Calendar")
         }
     }
 

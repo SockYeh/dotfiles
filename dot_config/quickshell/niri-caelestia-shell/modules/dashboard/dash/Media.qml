@@ -1,13 +1,22 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
+import qs.components.effects
+import qs.components.controls
 import qs.components.images
-import qs.components.misc
 import qs.services
-import qs.config
 import qs.utils
+import qs.config
 import Caelestia.Services
+import Quickshell
+import Quickshell.Widgets
+import Quickshell.Services.Mpris
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Shapes
 
+// Overview media card. Landscape: the cover and its progress ring sit on the
+// left, the track text fills the middle, and the controls sit on the right.
 Item {
     id: root
 
@@ -16,9 +25,12 @@ Item {
         return active?.length ? active.position / active.length : 0;
     }
 
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
+    // The cover keeps the card's height; the card stretches to whatever width
+    // the overview's bottom row gives it.
+    readonly property int coverSize: Math.max(80, Math.min(Config.dashboard.sizes.mediaCoverArtSize, height - Appearance.padding.xl))
+
     implicitWidth: Config.dashboard.sizes.mediaWidth
+    implicitHeight: Config.dashboard.sizes.mediaCoverArtSize + Appearance.padding.xl
 
     Behavior on playerProgress {
         Anim {
@@ -32,10 +44,6 @@ Item {
         triggeredOnStart: true
         repeat: true
         onTriggered: Players.active?.positionChanged()
-    }
-
-    ServiceRef {
-        service: BeatTracker
     }
 
     Shape {
@@ -85,11 +93,10 @@ Item {
     StyledClippingRect {
         id: cover
 
-        anchors.top: parent.top
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Appearance.padding.xl + Config.dashboard.sizes.mediaProgressThickness + Appearance.spacing.sm
 
+        implicitWidth: root.coverSize
         implicitHeight: width
         color: Colours.tPalette.m3surfaceContainerHigh
         radius: Infinity
@@ -112,62 +119,61 @@ Item {
         }
     }
 
-    StyledText {
-        id: title
+    ColumnLayout {
+        id: textColumn
 
-        anchors.top: cover.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.lg
+        anchors.left: cover.right
+        anchors.leftMargin: Appearance.spacing.lg
+        anchors.right: controls.left
+        anchors.rightMargin: Appearance.spacing.lg
+        anchors.verticalCenter: cover.verticalCenter
 
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
-        color: Colours.palette.m3primary
-        font.pointSize: Appearance.font.size.bodyMedium
+        spacing: Appearance.spacing.xs
 
-        width: parent.implicitWidth - Appearance.padding.xl * 2
-        elide: Text.ElideRight
-    }
+        StyledText {
+            id: title
 
-    StyledText {
-        id: album
+            Layout.fillWidth: true
 
-        anchors.top: title.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.sm
+            animate: true
+            horizontalAlignment: Text.AlignLeft
+            text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
+            color: Colours.palette.m3primary
+            font.pointSize: Appearance.font.size.bodyMedium
+            elide: Text.ElideRight
+        }
 
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.labelLarge
+        StyledText {
+            id: album
 
-        width: parent.implicitWidth - Appearance.padding.xl * 2
-        elide: Text.ElideRight
-    }
+            Layout.fillWidth: true
 
-    StyledText {
-        id: artist
+            animate: true
+            horizontalAlignment: Text.AlignLeft
+            text: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
+            color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.labelLarge
+            elide: Text.ElideRight
+        }
 
-        anchors.top: album.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.sm
+        StyledText {
+            id: artist
 
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
-        color: Colours.palette.m3secondary
+            Layout.fillWidth: true
 
-        width: parent.implicitWidth - Appearance.padding.xl * 2
-        elide: Text.ElideRight
+            animate: true
+            horizontalAlignment: Text.AlignLeft
+            text: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
+            color: Colours.palette.m3secondary
+            elide: Text.ElideRight
+        }
     }
 
     Row {
         id: controls
 
-        anchors.top: artist.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.md
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
 
         spacing: Appearance.spacing.sm
 
@@ -197,24 +203,6 @@ Item {
                 Players.active?.next();
             }
         }
-    }
-
-    AnimatedImage {
-        id: bongocat
-
-        anchors.top: controls.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: Appearance.spacing.sm
-        anchors.bottomMargin: Appearance.padding.xl
-        anchors.margins: Appearance.padding.xl * 2
-
-        playing: Players.active?.isPlaying ?? false
-        speed: BeatTracker.bpm / 300
-        source: Paths.absolutePath(Config.paths.mediaGif)
-        asynchronous: true
-        fillMode: AnimatedImage.PreserveAspectFit
     }
 
     component Control: StyledRect {

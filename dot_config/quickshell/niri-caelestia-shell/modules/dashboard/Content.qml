@@ -135,7 +135,9 @@ Item {
                     }
 
                     Pane {
-                        sourceComponent: Performance {}
+                        sourceComponent: CalendarPane {
+                            state: root.state
+                        }
                     }
                 }
 

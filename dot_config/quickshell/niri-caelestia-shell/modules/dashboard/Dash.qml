@@ -48,37 +48,29 @@ GridLayout {
 
     Rect {
         Layout.row: 1
-        Layout.preferredWidth: dateTime.implicitWidth
+        Layout.preferredWidth: date.implicitWidth
         Layout.fillHeight: true
 
-        DateTime {
-            id: dateTime
+        Date {
+            id: date
         }
     }
 
+    // Music player spans the rest of the bottom row, which is what makes it
+    // landscape rather than a tall column on the right.
     Rect {
         Layout.row: 1
         Layout.column: 1
         Layout.columnSpan: 4
         Layout.fillWidth: true
-        Layout.preferredHeight: calendar.implicitHeight
-
-        Calendar {
-            id: calendar
-
-            state: root.state
-        }
-    }
-
-    Rect {
-        Layout.row: 0
-        Layout.column: 5
-        Layout.rowSpan: 2
-        Layout.preferredWidth: media.implicitWidth
-        Layout.fillHeight: true
+        // The row takes its height from the card: a fillHeight cell with no
+        // preferred size collapses to nothing.
+        Layout.preferredHeight: media.implicitHeight
 
         Media {
             id: media
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.md
         }
     }
 }
