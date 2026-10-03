@@ -15,8 +15,10 @@ Item {
 
     // The fill's body sits one flare inside the wrapper (the flare overhangs
     // it), so the content has to start where the body does — otherwise text
-    // spills sideways over the cove that's cut out of the corner.
-    readonly property int inset: wrapper.isDetached ? Appearance.rounding.normal : Config.border.rounding
+    // spills sideways over the cove that's cut out of the corner. The usual
+    // padding still applies inside that, so the panel keeps its slack around
+    // content that draws wider than its implicit width.
+    readonly property int inset: (wrapper.isDetached ? Appearance.rounding.normal : Config.border.rounding) + Appearance.padding.xl
 
     implicitWidth: (content.children.find(c => c.shouldBeActive)?.implicitWidth ?? 0) + root.inset * 2
     implicitHeight: (content.children.find(c => c.shouldBeActive)?.implicitHeight ?? 0) + Appearance.padding.xl * 2
