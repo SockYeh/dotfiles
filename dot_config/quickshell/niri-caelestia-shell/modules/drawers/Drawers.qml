@@ -90,14 +90,33 @@ Variants {
                     radius: Config.border.rounding
                 }
 
-                // Quick toggles and the toast stack, same frost.
+                // Quick toggles, same frost.
                 Region {
                     item: panels.quicktoggles
                     radius: Config.border.rounding
                 }
 
+                // One rect per visible toast rather than one over the whole
+                // stack, otherwise several toasts share a single frosted box
+                // and the gap between them is blurred too. Sized to
+                // Config.utilities.maxToasts.
                 Region {
-                    item: panels.toasts
+                    item: panels.toasts.visibleToast(0)
+                    radius: Config.border.rounding
+                }
+
+                Region {
+                    item: panels.toasts.visibleToast(1)
+                    radius: Config.border.rounding
+                }
+
+                Region {
+                    item: panels.toasts.visibleToast(2)
+                    radius: Config.border.rounding
+                }
+
+                Region {
+                    item: panels.toasts.visibleToast(3)
                     radius: Config.border.rounding
                 }
             }

@@ -13,22 +13,25 @@ Item {
     readonly property int spacing: Appearance.spacing.sm
     property bool flag
 
-    Connections {
-        target: Toaster
+    implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.md * 2
 
-        // One toast at a time: a new one replaces whatever was showing,
-        // otherwise they pile up on top of each other at the top centre.
-        function onToastsChanged() {
-            // Snapshot the list, closing mutates it and re-emits this signal.
-            const list = Toaster.toasts.slice(0);
-            for (let i = 0; i < list.length - 1; i++) {
-                if (!list[i].closed)
-                    list[i].close();
-            }
+    // Visible toast at `index`, oldest first, or null. The blur region in
+    // Drawers.qml binds to this so every toast gets its own blurred rect —
+    // a single rect over the whole stack reads as one frosted box around
+    // all of them.
+    function visibleToast(index: int): var {
+        root.flag; // Re-run when the toast list changes.
+        let seen = 0;
+        for (let i = 0; i < repeater.count; i++) {
+            const item = repeater.itemAt(i);
+            if (!item || item.modelData.closed || item.previewHidden)
+                continue;
+            if (seen++ === index)
+                return item;
         }
+        return null;
     }
 
-    implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.md * 2
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {
