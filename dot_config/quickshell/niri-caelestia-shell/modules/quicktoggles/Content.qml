@@ -184,6 +184,17 @@ Item {
 
     }
 
+    // Click-away catcher: sits under the picker (z 99 vs its 100) and only exists
+    // while it is open, so clicking elsewhere in the panel dismisses the menu
+    // instead of hitting the controls underneath.
+    MouseArea {
+        anchors.fill: parent
+        z: 99
+        visible: exitNodeMenu.expanded
+
+        onClicked: exitNodeMenu.expanded = false
+    }
+
     // The picker belongs to the panel: close it when the panel goes away.
     Connections {
         target: root.visibilities

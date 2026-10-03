@@ -89,6 +89,17 @@ Variants {
                     item: panels.popouts
                     radius: Config.border.rounding
                 }
+
+                // Quick toggles and the toast stack, same frost.
+                Region {
+                    item: panels.quicktoggles
+                    radius: Config.border.rounding
+                }
+
+                Region {
+                    item: panels.toasts
+                    radius: Config.border.rounding
+                }
             }
 
             Variants {

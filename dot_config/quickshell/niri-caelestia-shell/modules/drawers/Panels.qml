@@ -140,6 +140,8 @@ Item {
         anchors.right: parent.right
     }
 
+    readonly property Toasts.Toasts toasts: toasts
+
     Toasts.Toasts {
         id: toasts
 

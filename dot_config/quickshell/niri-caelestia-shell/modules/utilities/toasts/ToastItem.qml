@@ -15,28 +15,12 @@ StyledRect {
     anchors.right: parent.right
     implicitHeight: layout.implicitHeight + Appearance.padding.sm * 2
 
-    radius: Appearance.rounding.normal
-    color: {
-        if (root.modelData.type === Toast.Success)
-            return Colours.palette.m3successContainer;
-        if (root.modelData.type === Toast.Warning)
-            return Colours.palette.m3secondary;
-        if (root.modelData.type === Toast.Error)
-            return Colours.palette.m3errorContainer;
-        return Colours.palette.m3surface;
-    }
+    radius: Config.border.rounding
+    // Same frost as every other shell surface; the type colour lives in the
+    // icon plate below instead of tinting the whole toast.
+    color: Qt.alpha(Colours.palette.m3surface, 0.4)
 
-    border.width: 1
-    border.color: {
-        let colour = Colours.palette.m3outlineVariant;
-        if (root.modelData.type === Toast.Success)
-            colour = Colours.palette.m3success;
-        if (root.modelData.type === Toast.Warning)
-            colour = Colours.palette.m3secondaryContainer;
-        if (root.modelData.type === Toast.Error)
-            colour = Colours.palette.m3error;
-        return Qt.alpha(colour, 0.3);
-    }
+    border.width: 0
 
     Elevation {
         anchors.fill: parent
