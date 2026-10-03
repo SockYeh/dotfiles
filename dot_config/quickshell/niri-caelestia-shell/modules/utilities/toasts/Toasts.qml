@@ -13,6 +13,21 @@ Item {
     readonly property int spacing: Appearance.spacing.sm
     property bool flag
 
+    Connections {
+        target: Toaster
+
+        // One toast at a time: a new one replaces whatever was showing,
+        // otherwise they pile up on top of each other at the top centre.
+        function onToastsChanged() {
+            // Snapshot the list, closing mutates it and re-emits this signal.
+            const list = Toaster.toasts.slice(0);
+            for (let i = 0; i < list.length - 1; i++) {
+                if (!list[i].closed)
+                    list[i].close();
+            }
+        }
+    }
+
     implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.md * 2
     implicitHeight: {
         let h = -spacing;
