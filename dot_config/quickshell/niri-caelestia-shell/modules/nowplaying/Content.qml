@@ -22,10 +22,10 @@ Item {
 
         anchors.fill: parent
 
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3surface
-        border.width: 1
-        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.3)
+        // Same surface as a toast: frosted fill, no outline.
+        radius: Config.border.rounding
+        color: Colours.frost
+        border.width: 0
 
         Elevation {
             anchors.fill: card
@@ -45,7 +45,7 @@ Item {
                 implicitWidth: root.artSize
                 implicitHeight: root.artSize
                 radius: Infinity
-                color: Colours.tPalette.m3surfaceContainerHigh
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.12)
 
                 MaterialIcon {
                     anchors.centerIn: parent

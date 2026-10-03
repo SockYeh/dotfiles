@@ -96,6 +96,11 @@ Variants {
                     radius: Config.border.rounding
                 }
 
+                Region {
+                    item: panels.nowPlaying
+                    radius: Config.border.rounding
+                }
+
                 // One rect per visible toast rather than one over the whole
                 // stack, otherwise several toasts share a single frosted box
                 // and the gap between them is blurred too. Sized to
