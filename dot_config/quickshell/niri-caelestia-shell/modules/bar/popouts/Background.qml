@@ -36,6 +36,9 @@ ShapePath {
     // reading as an opaque black box.
     fillColor: Colours.frost
 
+    // Tip of the left flare, then clockwise: down the left side, along the
+    // bottom to the right, up the right side, out to the right tip. The
+    // closing segment is the top edge, spanning tip to tip.
     PathMove {
         x: root.leftEdge - root.flare
         y: 0
@@ -55,27 +58,28 @@ ShapePath {
         relativeY: root.wrapper.height - root.roundingY * 2
     }
 
-    // Bottom-right fillet. Concave normally; when the popout reaches the
-    // bottom of the screen it bulges out instead, so the two meet flush.
+    // Bottom fillets. Concave normally; when the popout reaches the bottom of
+    // the screen they bulge out instead, so the two meet flush, which is why
+    // `ibr` flips both the chord and the sweep.
     PathArc {
-        relativeX: -root.fillet * root.ibr
+        relativeX: root.fillet * root.ibr
         relativeY: root.roundingY
         radiusX: root.fillet
         radiusY: root.roundingY
-        direction: PathArc.Clockwise
+        direction: root.ibr < 0 ? PathArc.Clockwise : PathArc.Counterclockwise
     }
 
     PathLine {
-        relativeX: -(root.bodyWidth - root.fillet * 2 * root.ibr)
+        relativeX: root.bodyWidth - root.fillet * 2 * root.ibr
         relativeY: 0
     }
 
     PathArc {
-        relativeX: -root.fillet * root.ibr
+        relativeX: root.fillet * root.ibr
         relativeY: -root.roundingY
         radiusX: root.fillet
         radiusY: root.roundingY
-        direction: root.ibr < 0 ? PathArc.Counterclockwise : PathArc.Clockwise
+        direction: root.ibr < 0 ? PathArc.Clockwise : PathArc.Counterclockwise
     }
 
     PathLine {

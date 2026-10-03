@@ -13,7 +13,12 @@ Item {
 
     anchors.centerIn: parent
 
-    implicitWidth: (content.children.find(c => c.shouldBeActive)?.implicitWidth ?? 0) + Appearance.padding.xl * 2
+    // The fill's body sits one flare inside the wrapper (the flare overhangs
+    // it), so the content has to start where the body does — otherwise text
+    // spills sideways over the cove that's cut out of the corner.
+    readonly property int inset: wrapper.isDetached ? Appearance.rounding.normal : Config.border.rounding
+
+    implicitWidth: (content.children.find(c => c.shouldBeActive)?.implicitWidth ?? 0) + root.inset * 2
     implicitHeight: (content.children.find(c => c.shouldBeActive)?.implicitHeight ?? 0) + Appearance.padding.xl * 2
 
     // Persistent storage for the password network - survives network popout deactivation
@@ -24,6 +29,8 @@ Item {
 
         anchors.fill: parent
         anchors.margins: Appearance.padding.xl
+        anchors.leftMargin: root.inset
+        anchors.rightMargin: root.inset
 
         Popout {
             name: "wsWindow"
