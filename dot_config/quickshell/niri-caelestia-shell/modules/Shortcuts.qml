@@ -34,15 +34,6 @@ Scope {
         target: "drawers"
 
         function toggle(drawer: string): void {
-            if (drawer === "manga" && !Config.extra.manga) {
-                Toaster.toast(qsTr("Manga feature disabled"), qsTr("Enable it in the Control Center settings"), "manga", Toast.Warning)
-                return
-            }
-            if (drawer === "novel" && !Config.extra.novel) {
-                Toaster.toast(qsTr("Novel feature disabled"), qsTr("Enable it in the Control Center settings"), "book", Toast.Warning)
-                return
-            }
-
             if (list().split("\n").includes(drawer)) {
                 const visibilities = Visibilities.getForActive();
                 visibilities[drawer] = !visibilities[drawer];
@@ -136,29 +127,6 @@ Scope {
         }
     }
 
-    IpcHandler {
-        target: "mangaReader"
-        function toggle(): void {
-            if (!Config.extra.manga) {
-                Toaster.toast(qsTr("Manga feature disabled"), qsTr("Enable it in the Control Center settings"), "manga", Toast.Warning)
-                return
-            }
-            const visibilities = Visibilities.getForActive()
-            visibilities.manga = !visibilities.manga
-        }
     }
-
-    IpcHandler {
-        target: "novelReader"
-        function toggle(): void {
-            if (!Config.extra.novel) {
-                Toaster.toast(qsTr("Novel feature disabled"), qsTr("Enable it in the Control Center settings"), "book", Toast.Warning)
-                return
-            }
-            const visibilities = Visibilities.getForActive()
-            visibilities.novel = !visibilities.novel
-        }
-    }
-}
 
 // keybind-ipc-wallpaper 1790887284

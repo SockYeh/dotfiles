@@ -29,10 +29,6 @@ binds {
     XF86MonBrightnessDown {spawn-sh "qs -c niri-caelestia-shell ipc call brightness set 5%-"; }
     Alt+XF86MonBrightnessUp {spawn-sh "qs -c niri-caelestia-shell ipc call brightness set +1%"; }
     Alt+XF86MonBrightnessDown {spawn-sh "qs -c niri-caelestia-shell ipc call brightness set 1%-"; }
-
-    // Manga and Novel Reader
-    Mod+M {spawn-sh "qs -c niri-caelestia-shell ipc call mangaReader toggle";}
-    Mod+Shift+M {spawn-sh "qs -c niri-caelestia-shell ipc call novelReader toggle";}
 }
 
 layer-rule {

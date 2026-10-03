@@ -15,23 +15,6 @@ Item {
 
     implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.md * 2
 
-    // Visible toast at `index`, oldest first, or null. The blur region in
-    // Drawers.qml binds to this so every toast gets its own blurred rect —
-    // a single rect over the whole stack reads as one frosted box around
-    // all of them.
-    function visibleToast(index: int): var {
-        root.flag; // Re-run when the toast list changes.
-        let seen = 0;
-        for (let i = 0; i < repeater.count; i++) {
-            const item = repeater.itemAt(i);
-            if (!item || item.modelData.closed || item.previewHidden)
-                continue;
-            if (seen++ === index)
-                return item;
-        }
-        return null;
-    }
-
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {

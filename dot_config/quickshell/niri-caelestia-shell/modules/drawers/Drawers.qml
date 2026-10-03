@@ -5,6 +5,7 @@ import qs.components.containers
 import qs.services
 import qs.config
 import qs.modules.bar
+import qs.modules.bar.popouts as BarPopouts
 import qs.modules.dashboard
 import Quickshell
 import Quickshell.Wayland
@@ -30,7 +31,7 @@ Variants {
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || visibilities.keybinds || visibilities.editingWeatherLocation || visibilities.dashboard || visibilities.manga || visibilities.novel || panels.popouts.isDetached ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || visibilities.keybinds || visibilities.editingWeatherLocation || visibilities.dashboard || panels.popouts.isDetached ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
             mask: Region {
                 x: Config.border.thickness
@@ -87,9 +88,10 @@ Variants {
                     radius: Config.border.rounding
                 }
 
-                Region {
-                    item: panels.popouts
-                    radius: Config.border.rounding
+                BarPopouts.BlurRegion {
+                    wrapper: panels.popouts
+                    bar: bar
+                    invertBottomRounding: panels.popouts.animY + panels.popouts.height + 1 >= panels.height
                 }
 
                 // Quick toggles, same frost.
@@ -98,34 +100,8 @@ Variants {
                     radius: Config.border.rounding
                 }
 
-                Region {
-                    item: panels.nowPlaying
-                    radius: Config.border.rounding
-                }
-
-                // One rect per visible toast rather than one over the whole
-                // stack, otherwise several toasts share a single frosted box
-                // and the gap between them is blurred too. Sized to
-                // Config.utilities.maxToasts.
-                Region {
-                    item: panels.toasts.visibleToast(0)
-                    radius: Config.border.rounding
-                }
-
-                Region {
-                    item: panels.toasts.visibleToast(1)
-                    radius: Config.border.rounding
-                }
-
-                Region {
-                    item: panels.toasts.visibleToast(2)
-                    radius: Config.border.rounding
-                }
-
-                Region {
-                    item: panels.toasts.visibleToast(3)
-                    radius: Config.border.rounding
-                }
+                // No blur behind the toasts or the now-playing popup: they
+                // are flat translucent slabs, not frosted glass.
             }
 
             Variants {
@@ -191,8 +167,6 @@ Variants {
                 property bool keybinds
                 property bool editingWeatherLocation
                 property bool notifsExpanded
-                property bool manga
-                property bool novel
 
                 Component.onCompleted: Visibilities.screens[scope.modelData.name] = this
             }

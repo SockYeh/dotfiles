@@ -148,51 +148,8 @@ Item {
         anchors.right: parent.right
 
         asynchronous: true
-        opacity: 0
-        scale: 0.8
-        active: false
-
-        states: State {
-            name: "active"
-            when: popout.shouldBeActive
-
-            PropertyChanges {
-                popout.active: true
-                popout.opacity: 1
-                popout.scale: 1
-            }
-        }
-
-        transitions: [
-            Transition {
-                from: "active"
-                to: ""
-
-                SequentialAnimation {
-                    Anim {
-                        properties: "opacity,scale"
-                        duration: Appearance.anim.durations.small
-                    }
-                    PropertyAction {
-                        target: popout
-                        property: "active"
-                    }
-                }
-            },
-            Transition {
-                from: ""
-                to: "active"
-
-                SequentialAnimation {
-                    PropertyAction {
-                        target: popout
-                        property: "active"
-                    }
-                    Anim {
-                        properties: "opacity,scale"
-                    }
-                }
-            }
-        ]
+        // No fade or scale, matching the dashboard: only the wrapper animates,
+        // so the content is always the same size as the panel around it.
+        active: popout.shouldBeActive
     }
 }

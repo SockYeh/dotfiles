@@ -8,8 +8,6 @@ import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
 import qs.modules.quicktoggles as QuickToggles
-import qs.modules.manga as MangaModule
-import qs.modules.novel as NovelModule
 import QtQuick
 import QtQuick.Shapes
 
@@ -59,26 +57,16 @@ Shape {
         startY: 0
     }
 
-    MangaModule.Background {
-        wrapper: root.panels.manga
-
-        startX: 0
-        startY: 0
-    }
-
-    NovelModule.Background {
-        wrapper: root.panels.novel
-
-        startX: root.width
-        startY: 0
-    }
-
     BarPopouts.Background {
         wrapper: root.panels.popouts
-        invertBottomRounding: wrapper.y + wrapper.height + 1 >= root.height
+        invertBottomRounding: wrapper.animY + wrapper.height + 1 >= root.height
 
-        startX: wrapper.x
-        startY: wrapper.y - rounding * sideRounding
+        // animX/animY, not x/y: the wrapper slides by translating itself with
+        // the difference between the two, so its content sits at animX while
+        // the raw x jumps to the final spot immediately. The fill has to track
+        // where the content actually is.
+        startX: wrapper.animX
+        startY: wrapper.animY
     }
 
     Utilities.Background {

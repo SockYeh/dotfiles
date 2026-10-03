@@ -21,7 +21,6 @@ Singleton {
     property alias session: adapter.session
     property alias lock: adapter.lock
     property alias utilities: adapter.utilities
-    property alias extra: adapter.extra
     property alias services: adapter.services
     property alias paths: adapter.paths
 
@@ -78,8 +77,7 @@ Singleton {
             lock: serializeLock,
             utilities: serializeUtilities,
             services: serializeServices,
-            paths: serializePaths,
-            extra: serializeExtra
+            paths: serializePaths
         };
 
         const result = {};
@@ -447,13 +445,6 @@ Singleton {
         };
     }
 
-    function serializeExtra(): var {
-        return {
-            manga: extra.manga,
-            novel: extra.novel
-        };
-    }
-
     Timer {
         id: recentSaveCooldown
         interval: 2000
@@ -564,7 +555,6 @@ Singleton {
             property SessionConfig session: SessionConfig {}
             property LockConfig lock: LockConfig {}
             property UtilitiesConfig utilities: UtilitiesConfig {}
-            property ExtraConfig extra: ExtraConfig {}
             property ServiceConfig services: ServiceConfig {}
             property UserPaths paths: UserPaths {}
         }

@@ -15,10 +15,12 @@ StyledRect {
     anchors.right: parent.right
     implicitHeight: layout.implicitHeight + Appearance.padding.sm * 2
 
-    radius: Config.border.rounding
-    // Same frost as every other shell surface; the type colour lives in the
-    // icon plate below instead of tinting the whole toast.
-    color: Colours.frost
+    // Stadium ends: fully rounded left and right, like a pill.
+    radius: height / 2
+    // Flat neutral veil rather than the panel frost — over a dark backdrop
+    // this lands on the plain dark grey the toasts are supposed to read as.
+    // The type colour lives in the icon plate below instead.
+    color: Qt.alpha(Colours.palette.m3onSurface, 0.2)
 
     border.width: 0
 

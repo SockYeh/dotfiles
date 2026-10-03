@@ -22,9 +22,9 @@ Item {
 
         anchors.fill: parent
 
-        // Same surface as a toast: frosted fill, no outline.
-        radius: Config.border.rounding
-        color: Colours.frost
+        // Same surface as a toast: stadium ends, flat veil, no outline.
+        radius: height / 2
+        color: Qt.alpha(Colours.palette.m3onSurface, 0.2)
         border.width: 0
 
         Elevation {
@@ -44,7 +44,7 @@ Item {
             StyledClippingRect {
                 implicitWidth: root.artSize
                 implicitHeight: root.artSize
-                radius: Infinity
+                radius: Appearance.rounding.normal
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.12)
 
                 MaterialIcon {

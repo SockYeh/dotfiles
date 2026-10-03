@@ -26,6 +26,12 @@ Item {
     implicitWidth: 450
     implicitHeight: mainLayout.implicitHeight + padding * 2
 
+    // Routed through root: the VPN toggle is an inline component, and the
+    // exit node menu's id isn't visible inside one.
+    function openExitNodeMenu(): void {
+        exitNodeMenu.open();
+    }
+
     ColumnLayout {
         id: mainLayout
         anchors.left: parent.left
@@ -155,18 +161,10 @@ Item {
                     disabled: VPN.connecting
                     visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
                     onClicked: VPN.toggle()
-
                     // Right click opens the exit node list (tailscale only).
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.RightButton
-
-                        onClicked: {
-                            if (!VPN.supportsExitNodes)
-                                return;
-
-                            exitNodeMenu.open();
-                        }
+                    rightClickAction: () => {
+                        if (VPN.supportsExitNodes)
+                            root.openExitNodeMenu();
                     }
                 }
 
@@ -321,6 +319,22 @@ Item {
 
     // Toggle component matching Hyprland's utilities/cards/Toggles style
     component Toggle: IconButton {
+        id: toggle
+
+        // Optional right click action. Inline components can't reach the
+        // enclosing component's scope, so callers hand over a callback.
+        property var rightClickAction: null
+        property bool rightClickEnabled: true
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            visible: toggle.rightClickAction !== null
+            enabled: toggle.rightClickEnabled
+
+            onClicked: toggle.rightClickAction()
+        }
+
         Layout.fillWidth: true
         Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Appearance.padding.xl : internalChecked ? Appearance.padding.sm : 0)
         radius: stateLayer.pressed ? Appearance.rounding.small / 2 : internalChecked ? Appearance.rounding.small : Appearance.rounding.normal

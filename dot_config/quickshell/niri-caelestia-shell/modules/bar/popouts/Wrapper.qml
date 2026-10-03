@@ -24,25 +24,37 @@ Item {
     property string queuedMode
     readonly property bool isDetached: detachedMode.length > 0
 
+    // Same timing as the dashboard (modules/dashboard/Wrapper.qml): a long
+    // decelerating open and a shorter accelerating close, so a popout leaving
+    // the bar feels like the same surface as the panel hanging under it.
     property int animLength: Appearance.anim.durations.normal
     property list<real> animCurve: Appearance.anim.curves.emphasized
 
+    function setAnim(open: bool): void {
+        if (open) {
+            animLength = Appearance.anim.durations.large;
+            animCurve = Appearance.anim.curves.emphasizedDecel;
+        } else {
+            animLength = Appearance.anim.durations.normal;
+            animCurve = Appearance.anim.curves.emphasizedAccel;
+        }
+    }
+
+    onHasCurrentChanged: root.setAnim(hasCurrent)
+
     function detach(mode: string): void {
-        animLength = Appearance.anim.durations.large;
+        root.setAnim(true);
         if (mode != "winfo") {
             detachedMode = "any";
             queuedMode = mode;
         }
-        
+
         focus = true;
     }
 
     function close(): void {
         hasCurrent = false;
-        animCurve = Appearance.anim.curves.emphasizedAccel;
-        animLength = Appearance.anim.durations.normal;
         detachedMode = "";
-        animCurve = Appearance.anim.curves.emphasized;
     }
 
     visible: width > 0 && height > 0
