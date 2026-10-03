@@ -2,7 +2,9 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.config
-import qs.services
+// Namespaced: a bare qs.services import would shadow the popout components
+// that share a name with a service singleton, e.g. Network.qml.
+import qs.services as Shell
 import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
@@ -175,7 +177,7 @@ Item {
             anchors.fill: parent
 
             radius: Appearance.rounding.normal
-            color: Colours.tPalette.m3surfaceContainer
+            color: Shell.Colours.tPalette.m3surfaceContainer
         }
 
         Loader {
