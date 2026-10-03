@@ -68,7 +68,7 @@ Item {
 
             readonly property alias contentRow: systemRow
 
-            color: Qt.alpha(Colours.palette.m3surface, 0.4)
+            color: Colours.frost
             radius: Appearance.rounding.full
             clip: true
 
@@ -276,7 +276,7 @@ Item {
 
             readonly property alias contentRow: networkRow
 
-            color: Qt.alpha(Colours.palette.m3surface, 0.4)
+            color: Colours.frost
             radius: Appearance.rounding.full
             clip: true
 

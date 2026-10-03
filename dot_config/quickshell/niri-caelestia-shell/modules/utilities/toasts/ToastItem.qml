@@ -18,7 +18,7 @@ StyledRect {
     radius: Config.border.rounding
     // Same frost as every other shell surface; the type colour lives in the
     // icon plate below instead of tinting the whole toast.
-    color: Qt.alpha(Colours.palette.m3surface, 0.4)
+    color: Colours.frost
 
     border.width: 0
 
@@ -43,12 +43,14 @@ StyledRect {
             radius: Appearance.rounding.normal
             color: {
                 if (root.modelData.type === Toast.Success)
-                    return Colours.palette.m3success;
+                    return Qt.alpha(Colours.palette.m3success, 0.85);
                 if (root.modelData.type === Toast.Warning)
-                    return Colours.palette.m3secondaryContainer;
+                    return Qt.alpha(Colours.palette.m3secondaryContainer, 0.85);
                 if (root.modelData.type === Toast.Error)
-                    return Colours.palette.m3error;
-                return Colours.palette.m3surfaceContainerHigh;
+                    return Qt.alpha(Colours.palette.m3error, 0.85);
+                // m3surfaceContainerHigh is pure black on OLED schemes, which
+                // reads as a hole punched in the toast.
+                return Qt.alpha(Colours.palette.m3onSurface, 0.12);
             }
 
             implicitWidth: implicitHeight

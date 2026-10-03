@@ -19,7 +19,7 @@ ShapePath {
     strokeWidth: -1
     // Translucent frosted fill so the popout matches the bar pills instead of
     // reading as an opaque black box.
-    fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
+    fillColor: Colours.frost
 
     PathArc {
         relativeX: root.roundingX

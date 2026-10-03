@@ -231,7 +231,7 @@ Item {
         opacity: expanded ? 1 : 0
         z: 100
 
-        color: Qt.alpha(Colours.palette.m3surface, 0.4)
+        color: Colours.frost
         radius: Config.border.rounding
 
         implicitWidth: exitNodeColumn.implicitWidth + Appearance.padding.xl * 2

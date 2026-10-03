@@ -25,6 +25,23 @@ Singleton {
     readonly property Transparency transparency: Transparency {}
     property real wallLuminance
 
+    // Frosted glass fill shared by every translucent surface: bar pills,
+    // panels, popouts, toasts. On OLED schemes every surface token is pure
+    // black, so tinting with m3surface alone renders as a black slab — mix
+    // some of the on-surface colour into the tint so the frost reads as
+    // glass instead of a hole punched in the desktop.
+    readonly property real frostAlpha: 0.4
+    readonly property real frostMix: 0.35
+    readonly property color frost: {
+        const tint = palette.m3surface;
+        const veil = palette.m3onSurface;
+        return Qt.rgba(
+            tint.r + (veil.r - tint.r) * frostMix,
+            tint.g + (veil.g - tint.g) * frostMix,
+            tint.b + (veil.b - tint.b) * frostMix,
+            frostAlpha);
+    }
+
     property bool _updatePending: false
 
     function requestUpdate() {

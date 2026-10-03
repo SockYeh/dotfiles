@@ -39,7 +39,7 @@ Item {
         implicitWidth: root.artSize
         implicitHeight: root.artSize
         radius: Infinity
-        color: Qt.alpha(Colours.palette.m3surface, 0.4)
+        color: Colours.frost
 
         // Shown until the track art loads over it
         MaterialIcon {

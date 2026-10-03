@@ -14,7 +14,7 @@ ShapePath {
 
     strokeWidth: -1
     // Same frost as the launcher, notifications and bar popouts.
-fillColor: Qt.alpha(Colours.palette.m3surface, 0.4)
+fillColor: Colours.frost
 
     // Bottom-right panel: starts at (root.width, root.height)
     // Goes left along bottom edge
