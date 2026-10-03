@@ -103,10 +103,12 @@ CustomMouseArea {
             if (!popouts.currentName.startsWith("traymenu") && popouts.currentName !== "wirelesspassword")
                 popouts.hasCurrent = false;
 
-            // Keep the bar shown while a popout anchored to it (tray menus,
-            // etc.) is open — the pointer leaving the bar strip to enter the
-            // menu must not make the bar collapse out from under it.
-            if (Config.bar.showOnHover && !popouts.hasCurrent)
+            // Keep the bar shown while something anchored to it is open: a
+            // popout (tray menus, etc.), or a drawer that reaches up into the
+            // bar's strip — the dashboard in particular, since opening it moves
+            // the pointer off the bar and used to collapse the bar underneath.
+            const drawerOverBar = visibilities.dashboard || visibilities.launcher || visibilities.session;
+            if (Config.bar.showOnHover && !popouts.hasCurrent && !drawerOverBar)
                 bar.isHovered = false;
         }
     }
