@@ -46,22 +46,12 @@ GridLayout {
         Weather {}
     }
 
+    // Music player spans the whole bottom row, which is what makes it landscape
+    // rather than a tall column on the right.
     Rect {
         Layout.row: 1
-        Layout.preferredWidth: date.implicitWidth
-        Layout.fillHeight: true
-
-        Date {
-            id: date
-        }
-    }
-
-    // Music player spans the rest of the bottom row, which is what makes it
-    // landscape rather than a tall column on the right.
-    Rect {
-        Layout.row: 1
-        Layout.column: 1
-        Layout.columnSpan: 4
+        Layout.column: 0
+        Layout.columnSpan: 5
         Layout.fillWidth: true
         // The row takes its height from the card: a fillHeight cell with no
         // preferred size collapses to nothing.
