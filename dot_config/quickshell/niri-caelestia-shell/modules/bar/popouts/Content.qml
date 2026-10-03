@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.config
+import qs.services
 import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
@@ -147,18 +148,47 @@ Item {
         }
     }
 
-    component Popout: Loader {
+    // Every popout is wrapped in a card, the same translucent rounded panel the
+    // dashboard draws behind its own content: the popout itself carries no
+    // tint, so without this the rows are read straight off the blurred
+    // backdrop.
+    component Popout: Item {
         id: popout
 
         required property string name
         property bool shouldBeActive: root.wrapper.currentName === name
 
+        property url source
+        property Component sourceComponent
+
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
 
-        asynchronous: true
         // No fade or scale, matching the dashboard: only the wrapper animates,
         // so the content is always the same size as the panel around it.
-        active: popout.shouldBeActive
+        visible: popout.shouldBeActive
+
+        implicitWidth: loader.implicitWidth + Appearance.padding.md * 2
+        implicitHeight: loader.implicitHeight + Appearance.padding.md * 2
+
+        StyledRect {
+            anchors.fill: parent
+
+            radius: Appearance.rounding.normal
+            color: Colours.tPalette.m3surfaceContainer
+        }
+
+        Loader {
+            id: loader
+
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.md
+
+            asynchronous: true
+            active: popout.shouldBeActive
+
+            source: popout.source
+            sourceComponent: popout.sourceComponent
+        }
     }
 }

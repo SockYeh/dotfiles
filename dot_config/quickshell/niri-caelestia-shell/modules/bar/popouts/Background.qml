@@ -32,9 +32,10 @@ ShapePath {
     property real ibr: invertBottomRounding ? -1 : 1
 
     strokeWidth: -1
-    // Translucent frosted fill so the popout matches the bar pills instead of
-    // reading as an opaque black box.
-    fillColor: Colours.frost
+    // No tint: the frost comes from the compositor blur alone, so a popout sits
+    // in the same tone as the empty space between the bar's pills — which is
+    // also why the dashboard's fill is transparent.
+    fillColor: "transparent"
 
     // Tip of the left flare, then clockwise: down the left side, along the
     // bottom to the right, up the right side, out to the right tip. The
