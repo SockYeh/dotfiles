@@ -5,6 +5,7 @@ import qs.services
 import qs.config
 import qs.utils
 import Quickshell
+import Quickshell.Io
 import QtQuick
 
 Row {
@@ -15,6 +16,35 @@ Row {
 
     padding: Appearance.padding.xl
     spacing: Appearance.spacing.lg
+
+    // Machine identity and today's date, in place of the distro and compositor.
+    // None of it changes while the dashboard is open, so it is read once.
+    property string identity: ""
+    property string kernel: ""
+
+    function ordinalDay(): string {
+        const day = Time.date.getDate();
+        const suffixes = ["th", "st", "nd", "rd"];
+        const v = day % 100;
+        return `${day}${suffixes[(v - 20) % 10] ?? suffixes[v] ?? suffixes[0]}`;
+    }
+
+    Process {
+        id: identProc
+
+        // "user@host kernel-release", in one shot: env vars aren't reliable
+        // for either half (HOSTNAME is often unset in a user session).
+        command: ["sh", "-c", "echo \"$(id -un)@$(hostname) $(uname -r)\""]
+        running: true
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const parts = this.text.trim().split(" ");
+                root.identity = parts[0] ?? "";
+                root.kernel = parts.slice(1).join(" ");
+            }
+        }
+    }
 
     StyledClippingRect {
         implicitWidth: info.implicitHeight
@@ -117,40 +147,15 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Appearance.spacing.lg
 
-        Item {
-            id: line
-
-            implicitWidth: icon.implicitWidth + text.width + text.anchors.leftMargin
-            implicitHeight: Math.max(icon.implicitHeight, text.implicitHeight)
-
-            ColouredIcon {
-                id: icon
-
-                anchors.left: parent.left
-                anchors.leftMargin: (Config.dashboard.sizes.infoIconSize - implicitWidth) / 2
-
-                source: SysInfo.osLogo
-                implicitSize: Math.floor(Appearance.font.size.bodyMedium * 1.34)
-                colour: Colours.palette.m3primary
-            }
-
-            StyledText {
-                id: text
-
-                anchors.verticalCenter: icon.verticalCenter
-                anchors.left: icon.right
-                anchors.leftMargin: icon.anchors.leftMargin
-                text: `:  ${SysInfo.osPrettyName || SysInfo.osName}`
-                font.pointSize: Appearance.font.size.bodyMedium
-
-                width: Config.dashboard.sizes.infoWidth
-                elide: Text.ElideRight
-            }
+        InfoLine {
+            icon: "terminal"
+            text: root.identity.length > 0 ? `${root.identity} (${root.kernel})` : qsTr("unknown host")
+            colour: Colours.palette.m3primary
         }
 
         InfoLine {
-            icon: "select_window_2"
-            text: SysInfo.wm
+            icon: "calendar_month"
+            text: `${Time.format("dddd")}, ${root.ordinalDay()} ${Time.format("MMMM")}`
             colour: Colours.palette.m3secondary
         }
 
@@ -194,7 +199,10 @@ Row {
             text: `:  ${line.text}`
             font.pointSize: Appearance.font.size.bodyMedium
 
-            width: Config.dashboard.sizes.infoWidth
+            // Grow with the text rather than clipping at the configured info
+            // width: the host line (user@host plus kernel release) is wider
+            // than the uptime line it used to be sized around.
+            width: Math.max(Config.dashboard.sizes.infoWidth, implicitWidth)
             elide: Text.ElideRight
         }
     }
