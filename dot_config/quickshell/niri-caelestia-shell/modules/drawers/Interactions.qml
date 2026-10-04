@@ -147,6 +147,12 @@ CustomMouseArea {
 
         // Always update visibility based on hover if not in shortcut mode
         if (!isShortcutActive("osd")) {
+            // Hovering brings up every enabled slider; a volume or brightness
+            // key press narrows it to just that one. Reset the mode only as the
+            // pointer enters the zone, so a key press while hovering isn't
+            // undone by the next mouse move.
+            if (showOsd && !osdHovered)
+                visibilities.osdMode = "all";
             visibilities.osd = showOsd;
             osdHovered = showOsd;
         } else if (showOsd) {

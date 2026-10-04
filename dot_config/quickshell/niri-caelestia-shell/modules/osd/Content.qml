@@ -14,6 +14,14 @@ Item {
     required property Brightness.Monitor monitor
     required property var visibilities
 
+    // "all" is the hover case: every enabled slider at once. A key press
+    // narrows it to just the one that changed (see osd/Interactions).
+    readonly property bool allSliders: visibilities.osdMode === "all"
+
+    function sliderFor(mode: string): bool {
+        return root.allSliders || visibilities.osdMode === mode;
+    }
+
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
 
@@ -28,7 +36,7 @@ Item {
 
         // Speaker volume
         WrappedLoader {
-            shouldBeActive: root.visibilities.osdMode === "volume"
+            shouldBeActive: root.sliderFor("volume")
 
             sourceComponent: CustomMouseArea {
                 implicitWidth: Config.osd.sizes.sliderWidth
@@ -53,7 +61,7 @@ Item {
 
         // Microphone volume
         WrappedLoader {
-            shouldBeActive: Config.osd.enableMicrophone && root.visibilities.osdMode === "mic"
+            shouldBeActive: Config.osd.enableMicrophone && root.sliderFor("mic")
 
             sourceComponent: CustomMouseArea {
                 implicitWidth: Config.osd.sizes.sliderWidth
@@ -78,7 +86,7 @@ Item {
 
         // Brightness
         WrappedLoader {
-            shouldBeActive: Config.osd.enableBrightness && root.visibilities.osdMode === "brightness"
+            shouldBeActive: Config.osd.enableBrightness && root.sliderFor("brightness")
 
             sourceComponent: CustomMouseArea {
                 implicitWidth: Config.osd.sizes.sliderWidth
