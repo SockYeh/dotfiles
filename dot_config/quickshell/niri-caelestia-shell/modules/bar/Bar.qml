@@ -100,15 +100,19 @@ Item {
     }
 
     function handleWheel(x: real, angleDelta: point): void {
-        // Horizontal scroll over the media pill skips tracks. Handled here
-        // because wheel events over the bar are routed through this function,
-        // not the pill's own MouseArea.
-        if (angleDelta.x !== 0 && overNowPlaying(x)) {
+        // Scrolling over the media pill skips tracks. Handled here because wheel
+        // events over the bar are routed through this function, not the pill's
+        // own MouseArea. Both axes are accepted: a plain wheel or touchpad only
+        // ever reports y, so testing x alone meant vertical scrolling did
+        // nothing. "Forward" means next on either axis — tilt right, or scroll
+        // down, matching how the same gesture moves through a list.
+        if ((angleDelta.x !== 0 || angleDelta.y !== 0) && overNowPlaying(x)) {
             const player = Players.active;
             if (!player)
                 return;
 
-            if (angleDelta.x > 0) {
+            const forward = angleDelta.x !== 0 ? angleDelta.x > 0 : angleDelta.y < 0;
+            if (forward) {
                 if (player.canGoNext)
                     player.next();
             } else if (player.canGoPrevious) {
