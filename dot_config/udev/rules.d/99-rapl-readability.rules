@@ -1,0 +1,13 @@
+# Make the RAPL energy counters readable without root so the shell's wattage
+# pill can read CPU package power.
+#
+# A manual chmod does not survive: the intel_rapl module recreates these
+# attribute files with mode 0400 whenever it reloads (or on boot), which is
+# what silently killed the wattage reading before.
+#
+# MODE= alone is not enough here — powercap zones live under
+# /sys/devices/virtual/powercap and have no device node, so udev has nothing to
+# chmod. RUN+ does it explicitly. Match on SUBSYSTEM=powercap, not platform:
+# these are virtual devices, and a --subsystem-match=platform trigger misses
+# them entirely.
+SUBSYSTEM=="powercap", KERNEL=="intel-rapl*", ATTR{name}=="energy_uj", RUN+="/bin/chmod 0444 /sys/class/powercap/%k/energy_uj"
