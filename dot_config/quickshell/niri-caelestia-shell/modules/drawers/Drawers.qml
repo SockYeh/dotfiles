@@ -8,6 +8,7 @@ import qs.modules.bar
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.dashboard
 import qs.modules.launcher as LauncherModule
+import qs.modules.osd as OsdModule
 import qs.modules.quicktoggles as QuickTogglesModule
 import Quickshell
 import Quickshell.Wayland
@@ -98,6 +99,13 @@ Variants {
 
                 QuickTogglesModule.BlurRegion {
                     quicktoggles: panels.quicktoggles
+                    bar: bar
+                }
+
+                // The OSD fill is a plain rounded rectangle, so its blur is a
+                // plain rounded rectangle that tracks the animating width.
+                OsdModule.BlurRegion {
+                    osd: panels.osd
                     bar: bar
                 }
 

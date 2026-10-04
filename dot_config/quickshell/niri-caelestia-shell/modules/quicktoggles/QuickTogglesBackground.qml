@@ -27,31 +27,26 @@ ShapePath {
     // Same frost as the launcher, notifications and bar popouts.
     fillColor: Colours.frost
 
-    // Screen corner, left along the bottom edge out past the flared tip, then
-    // up the left side, across the top, up the right flare and back down the
-    // screen edge to the corner.
+    // Screen corner, left along the straight bottom edge, up the left side,
+    // across the top, up the right flare and back down the screen edge to the
+    // corner.
     PathMove {
         x: 0
         y: 0
     }
 
+    // Square bottom-left corner: the bottom edge runs straight to the body and
+    // turns straight up. This corner carries no flare — the band along the
+    // bottom read as a lump either way, scooped when its arc turned inward and
+    // bulbous when it turned out.
     PathLine {
-        relativeX: -(root.wrapper.width + root.flare)
+        relativeX: -root.wrapper.width
         relativeY: 0
-    }
-
-    // Concave cove at the bottom-left shoulder.
-    PathArc {
-        relativeX: root.flare
-        relativeY: -root.roundingY
-        radiusX: root.flare
-        radiusY: root.roundingY
-        direction: PathArc.Counterclockwise
     }
 
     PathLine {
         relativeX: 0
-        relativeY: -(root.wrapper.height - root.roundingY * 2)
+        relativeY: -(root.wrapper.height - root.roundingY)
     }
 
     PathArc {

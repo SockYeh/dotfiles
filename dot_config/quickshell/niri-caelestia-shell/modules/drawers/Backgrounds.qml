@@ -25,8 +25,10 @@ Shape {
     Osd.Background {
         wrapper: root.panels.osd
 
-        startX: root.width - root.panels.session.width
-        startY: (root.height - wrapper.height) / 2 - rounding
+        // The path starts at the panel's top-left corner, so startX is its left
+        // edge. startY leaves one flare of headroom above the body for the tip.
+        startX: root.width - root.panels.session.width - wrapper.width
+        startY: (root.height - wrapper.height) / 2 - rounding - wrapper.flare
     }
 
     Notifications.Background {
