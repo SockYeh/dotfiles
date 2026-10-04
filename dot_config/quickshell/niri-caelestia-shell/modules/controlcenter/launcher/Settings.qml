@@ -165,6 +165,15 @@ ColumnLayout {
                 Config.markDirty("launcher");
             }
         }
+
+        ToggleRow {
+            label: qsTr("Clipboard")
+            checked: Config.launcher.useFuzzy.clip
+            toggle.onToggled: {
+                Config.launcher.useFuzzy.clip = checked;
+                Config.markDirty("launcher");
+            }
+        }
     }
 
     SectionHeader {

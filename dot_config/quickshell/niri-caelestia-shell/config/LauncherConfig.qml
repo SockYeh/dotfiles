@@ -21,6 +21,7 @@ JsonObject {
         property bool schemes: false
         property bool variants: false
         property bool wallpapers: false
+        property bool clip: false
     }
 
     component Sizes: JsonObject {

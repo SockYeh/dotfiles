@@ -316,7 +316,8 @@ Singleton {
                 actions: launcher.useFuzzy.actions,
                 schemes: launcher.useFuzzy.schemes,
                 variants: launcher.useFuzzy.variants,
-                wallpapers: launcher.useFuzzy.wallpapers
+                wallpapers: launcher.useFuzzy.wallpapers,
+                clip: launcher.useFuzzy.clip
             },
             sizes: {
                 itemWidth: launcher.sizes.itemWidth,

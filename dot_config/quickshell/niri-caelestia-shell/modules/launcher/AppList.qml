@@ -36,55 +36,48 @@ StyledListView {
         }
     }
 
-    // Clipboard data
-    ListModel { id: clipboardModel }
+    // Clipboard entries live in the ClipItems searcher; this only strips the
+    // ">clip " prefix so the query that reaches the matcher is the bare text.
+    readonly property string _clipQuery: _debouncedText.startsWith(`${Config.launcher.actionPrefix}clip `)
+        ? _debouncedText.slice(`${Config.launcher.actionPrefix}clip `.length).toLowerCase()
+        : ""
 
-    property var _clipFilteredValues: {
-        const query = _debouncedText.slice(`${Config.launcher.actionPrefix}clip `.length).toLowerCase();
-        let result = [];
-        for (let i = 0; i < clipboardModel.count; i++) {
-            const item = clipboardModel.get(i);
-            if (query === "" || item.entryText.toLowerCase().includes(query)) {
-                result.push({ entryId: item.entryId, entryText: item.entryText, isImage: item.isImage });
-            }
+    function refreshClipboard(): void { ClipItems.refresh(); }
+
+    function removeClipEntry(entryId: string): void { ClipItems.remove(entryId); }
+
+    // Read count alongside the query so this binding re-evaluates when the
+    // clipboard history is replaced, not only when the search text changes.
+    readonly property var listValues: {
+        const clipCount = ClipItems.count;
+        switch (state) {
+            case "actions":
+                return Actions.query(_debouncedText);
+            case "calc":
+                return [0];
+            case "scheme":
+                return Schemes.query(_debouncedText);
+            case "variant":
+                return M3Variants.query(_debouncedText);
+            case "clip":
+                return clipCount >= 0 ? ClipItems.query(_clipQuery) : [];
+            case "emoji":
+                return [0];
+            case "web":
+                return [0];
         }
-        return result;
-    }
-
-    Process {
-        id: cliphistProc
-        command: ["cliphist", "list"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                clipboardModel.clear();
-                const lines = text.trim().split("\n");
-                for (const line of lines) {
-                    if (!line) continue;
-                    const parts = line.split("\t");
-                    clipboardModel.append({
-                        entryId: parts[0],
-                        entryText: parts.slice(1).join("\t"),
-                        isImage: line.includes("[[ binary data")
-                    });
-                }
-            }
-        }
-    }
-
-    function refreshClipboard(): void { cliphistProc.running = true; }
-
-    function removeClipEntry(entryId: string): void {
-        for (let i = 0; i < clipboardModel.count; i++) {
-            if (clipboardModel.get(i).entryId === entryId) {
-                clipboardModel.remove(i);
-                break;
-            }
-        }
+        return Apps.search(_debouncedText);
     }
 
     model: ScriptModel {
         id: model
 
+        // One place picks what the list shows. This used to live in each
+        // state's PropertyChanges, which meant a mode entered before its
+        // source had data kept a stale snapshot: the binding did not
+        // re-evaluate when ClipItems' history arrived from cliphist a moment
+        // later, leaving ">clip" empty on the first open.
+        values: root.listValues
         onValuesChanged: root.currentIndex = 0
     }
 
@@ -131,7 +124,6 @@ StyledListView {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.search(root._debouncedText)
                 root.delegate: appItem
             }
         },
@@ -139,7 +131,6 @@ StyledListView {
             name: "actions"
 
             PropertyChanges {
-                model.values: Actions.query(root._debouncedText)
                 root.delegate: actionItem
             }
         },
@@ -147,7 +138,6 @@ StyledListView {
             name: "calc"
 
             PropertyChanges {
-                model.values: [0]
                 root.delegate: calcItem
             }
         },
@@ -155,7 +145,6 @@ StyledListView {
             name: "scheme"
 
             PropertyChanges {
-                model.values: Schemes.query(root._debouncedText)
                 root.delegate: schemeItem
             }
         },
@@ -163,7 +152,6 @@ StyledListView {
             name: "variant"
 
             PropertyChanges {
-                model.values: M3Variants.query(root._debouncedText)
                 root.delegate: variantItem
             }
         },
@@ -171,7 +159,6 @@ StyledListView {
             name: "clip"
 
             PropertyChanges {
-                model.values: root._clipFilteredValues
                 root.delegate: clipItem
             }
         },
@@ -179,7 +166,6 @@ StyledListView {
             name: "emoji"
 
             PropertyChanges {
-                model.values: [0]
                 root.delegate: emojiItem
             }
         },
@@ -187,7 +173,6 @@ StyledListView {
             name: "web"
 
             PropertyChanges {
-                model.values: [0]
                 root.delegate: webItem
             }
         }

@@ -256,12 +256,6 @@ Item {
                         if (root.visibilities.clipboardRequested) {
                             search.text = Config.launcher.actionPrefix + "clip ";
                             root.visibilities.clipboardRequested = false;
-                            // Read the history here rather than relying on
-                            // AppList's onStateChanged: that only fires when
-                            // the debounced text actually changes state, so
-                            // re-opening the clipboard on the same ">clip "
-                            // left the list empty and unsearchable.
-                            list.refreshClipboard();
                         } else if (root.visibilities.wallpaperRequested) {
                             search.text = Config.launcher.actionPrefix + "wallpaper ";
                             root.visibilities.wallpaperRequested = false;
