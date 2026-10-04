@@ -25,12 +25,17 @@ Item {
         return active?.length ? active.position / active.length : 0;
     }
 
+    // The progress ring is drawn outside the cover's bounds, so it — not the
+    // cover — is what has to fit inside the card. Without reserving room for
+    // it, the ring gets clipped by the card edge.
+    readonly property real ringGap: Config.dashboard.sizes.mediaProgressThickness / 2 + Appearance.spacing.sm
+
     // The cover keeps the card's height; the card stretches to whatever width
     // the overview's bottom row gives it.
-    readonly property int coverSize: Math.max(80, Math.min(Config.dashboard.sizes.mediaCoverArtSize, height - Appearance.padding.xl))
+    readonly property int coverSize: Math.max(80, Math.min(Config.dashboard.sizes.mediaCoverArtSize, height - root.ringGap * 2 - Appearance.padding.md))
 
     implicitWidth: Config.dashboard.sizes.mediaWidth
-    implicitHeight: Config.dashboard.sizes.mediaCoverArtSize + Appearance.padding.xl
+    implicitHeight: Config.dashboard.sizes.mediaCoverArtSize + root.ringGap * 2 + Appearance.padding.xl
 
     Behavior on playerProgress {
         Anim {
@@ -58,8 +63,8 @@ Item {
             PathAngleArc {
                 centerX: cover.x + cover.width / 2
                 centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.sm
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.sm
+                radiusX: cover.width / 2 + root.ringGap
+                radiusY: cover.height / 2 + root.ringGap
                 startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
                 sweepAngle: Config.dashboard.sizes.mediaProgressSweep
             }
@@ -78,8 +83,8 @@ Item {
             PathAngleArc {
                 centerX: cover.x + cover.width / 2
                 centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.sm
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.sm
+                radiusX: cover.width / 2 + root.ringGap
+                radiusY: cover.height / 2 + root.ringGap
                 startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
                 sweepAngle: Config.dashboard.sizes.mediaProgressSweep * root.playerProgress
             }
@@ -95,6 +100,7 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
+        anchors.leftMargin: root.ringGap
 
         implicitWidth: root.coverSize
         implicitHeight: width
@@ -123,7 +129,7 @@ Item {
         id: textColumn
 
         anchors.left: cover.right
-        anchors.leftMargin: Appearance.spacing.lg
+        anchors.leftMargin: root.ringGap + Appearance.spacing.lg
         anchors.right: controls.left
         anchors.rightMargin: Appearance.spacing.lg
         anchors.verticalCenter: cover.verticalCenter
