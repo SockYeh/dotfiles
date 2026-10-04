@@ -36,6 +36,18 @@
         place-within-backdrop true
     }
 
+    // Keep the shell wallpaper stationary in the niri overview backdrop
+    // instead of zooming out together with the workspace.
+    layer-rule {
+        match namespace="^caelestia-background$"
+        place-within-backdrop true
+    }
+
+    layer-rule {
+        match namespace="^quickshell:Backdrop$"
+        place-within-backdrop true
+    }
+
     layer-rule {
         match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
         background-effect {

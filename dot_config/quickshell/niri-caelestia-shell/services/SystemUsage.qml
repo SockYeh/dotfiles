@@ -103,11 +103,52 @@ Singleton {
         };
     }
 
-    // Total power in watts across every power supply the shell can read: the
-    // battery's draw on battery, or a USB-C input's draw when plugged in.
-// intel-rapl would be more precise for the package, but its counter is
-    // root-only on most kernels, so this is what actually reads back.
+    // Power in watts. Prefers the CPU package counter (intel-rapl), which needs
+    // the energy file to be readable; falls back to summing the power supplies
+    // the shell can always see, which only report a figure while the battery
+    // is actually discharging.
     property real watts
+    property bool raplReadable: false
+    property real _lastEnergyUj
+    property real _lastEnergyAt
+
+    // Returns true when it produced a reading, so the caller knows whether the
+    // fallback still needs running.
+    function updateWattageRapl(): bool {
+        raplFile.reload();
+        const text = raplFile.text();
+        if (!text) {
+            root.raplReadable = false;
+            return false;
+        }
+
+        const energy = parseFloat(text);
+        if (isNaN(energy)) {
+            root.raplReadable = false;
+            return false;
+        }
+
+        const now = Date.now();
+        // The counter wraps at max_energy_range_uj; a backwards jump means a
+        // wrap, so skip this tick's figure instead of reporting a spike.
+        if (root._lastEnergyUj !== undefined && energy >= root._lastEnergyUj) {
+            const seconds = (now - root._lastEnergyAt) / 1000;
+            if (seconds > 0) {
+                root.watts = (energy - root._lastEnergyUj) / 1e6 / seconds;
+                root.raplReadable = true;
+            }
+        }
+
+        root._lastEnergyUj = energy;
+        root._lastEnergyAt = now;
+        return root.raplReadable;
+    }
+
+    FileView {
+        id: raplFile
+
+        path: "/sys/class/powercap/intel-rapl:0/energy_uj"
+    }
 
     Process {
         id: powerProc
@@ -119,6 +160,11 @@ Singleton {
 
         stdout: StdioCollector {
             onStreamFinished: {
+                // RAPL won, if it is readable: it measures the package
+                // whether or not the machine is on battery.
+                if (root.raplReadable)
+                    return;
+
                 let total = 0;
                 for (const line of this.text.split("\n")) {
                     const microwatts = parseFloat(line);
@@ -133,21 +179,16 @@ Singleton {
     }
 
     Timer {
-        running: root.refCount > 0 && !powerProc.running
-        interval: Config.dashboard.resourceUpdateInterval
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: powerProc.running = true
-    }
-
-    Timer {
         running: root.refCount > 0
         interval: Config.dashboard.resourceUpdateInterval
         repeat: true
         triggeredOnStart: true
+
         onTriggered: {
             SysMonitor.updateAll();
+
+            if (!root.updateWattageRapl() && !powerProc.running)
+                powerProc.running = true;
         }
     }
     

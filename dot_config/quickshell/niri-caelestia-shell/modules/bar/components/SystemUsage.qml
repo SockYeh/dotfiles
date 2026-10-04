@@ -11,10 +11,10 @@ import QtQuick.Layouts
 // Live resource usage: memory, then CPU, then power — the last only when the
 // supplies report a draw.
 //
-// Icons are the Material Symbols stand-ins for the Noctalia set: its CPU glyph
-// is a chip with pins, which `memory` is here (there is no plain chip name in
-// this font — `cpu` and `settings_cpu` have no ligature and render as their own
-// text), and its RAM glyph is a stick, which `storage` is closest to.
+// Icons are the Material Symbols stand-ins for the Noctalia set: `memory_alt`
+// for the RAM stick, and `memory` for the CPU — this font has no plain chip
+// name, since `cpu` and `settings_cpu` have no ligature and render as their own
+// text.
 StyledRect {
     id: root
 
@@ -43,13 +43,13 @@ StyledRect {
 
             MaterialIcon {
                 animate: false
-                text: "storage"
+                text: "memory"
                 color: root.colour
             }
 
             StyledText {
                 animate: false
-                text: `${Math.round(SystemUsage.memPerc * 100)}%`
+                text: `${Math.round(SystemUsage.cpuPerc * 100)}%`
                 color: root.colour
                 font.family: Appearance.font.family.mono
             }
@@ -60,13 +60,13 @@ StyledRect {
 
             MaterialIcon {
                 animate: false
-                text: "memory"
+                text: "memory_alt"
                 color: root.colour
             }
 
             StyledText {
                 animate: false
-                text: `${Math.round(SystemUsage.cpuPerc * 100)}%`
+                text: `${Math.round(SystemUsage.memPerc * 100)}%`
                 color: root.colour
                 font.family: Appearance.font.family.mono
             }
