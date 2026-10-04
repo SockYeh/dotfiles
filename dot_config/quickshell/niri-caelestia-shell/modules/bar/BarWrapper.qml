@@ -15,8 +15,11 @@ Item {
     required property BarPopouts.Wrapper popouts
 
     // On an empty workspace there's nothing to make room for, so keep the bar
-    // permanently visible instead of the hover-to-show behaviour.
-    readonly property bool emptyWorkspace: Niri.getActiveWorkspaceWindows().length === 0
+    // permanently visible instead of the hover-to-show behaviour. "Empty" has to
+    // mean niri told us so: until its IPC is up there are no workspaces and no
+    // windows either, and treating that as an empty workspace pins the bar
+    // visible with its exclusive zone reserved for the whole session.
+    readonly property bool emptyWorkspace: Niri.niriAvailable && Niri.allWorkspaces?.length > 0 && Niri.getActiveWorkspaceWindows().length === 0
 
     readonly property int padding: Math.max(Appearance.padding.sm, Config.border.thickness)
     readonly property int contentHeight: Config.bar.sizes.innerWidth + padding * 2
