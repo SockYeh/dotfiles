@@ -12,7 +12,7 @@ Column {
     id: root
 
     spacing: Appearance.spacing.xs
-    width: Math.max(Config.bar.sizes.batteryWidth, header.implicitWidth)
+    width: Math.max(header.implicitWidth, limitRow.implicitWidth, profiles.implicitWidth + Appearance.padding.md * 2)
 
     readonly property bool hasBattery: UPower.displayDevice.isLaptopBattery
     readonly property int percentage: Math.round(UPower.displayDevice.percentage * 100)
@@ -80,30 +80,37 @@ Column {
         id: header
 
         width: parent.width
-        spacing: Appearance.spacing.sm
+        spacing: Appearance.spacing.xs
 
         StyledText {
             text: root.hasBattery ? root.stateLabel : qsTr("No battery detected")
-            font.weight: 500
+            font.weight: Font.Bold
         }
 
         StyledText {
-            visible: root.hasBattery
-            text: `${root.percentage}%`
-            color: Colours.palette.m3primary
-            font.family: Appearance.font.family.mono
+            visible: text.length > 0
+            text: root.timeText
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.labelMedium
         }
 
         Item {
             Layout.fillWidth: true
         }
 
+        // Keep the percentage centred over the charge-limit field below: same
+        // fixed width as the input, plus room for the trailing "%" label.
         StyledText {
-            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            visible: text.length > 0
-            text: root.timeText
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.labelMedium
+            Layout.preferredWidth: 58
+            Layout.alignment: Qt.AlignVCenter
+            visible: root.hasBattery
+            text: `${root.percentage}%`
+            color: Colours.palette.m3primary
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        Item {
+            Layout.preferredWidth: limitSuffix.implicitWidth
         }
     }
 
@@ -168,13 +175,15 @@ Column {
     }
 
     RowLayout {
+        id: limitRow
+
         width: parent.width
-        spacing: Appearance.spacing.sm
+        spacing: Appearance.spacing.xs
         visible: PowerManagement.chargeLimitAvailable
 
         StyledText {
             text: qsTr("Charge limit")
-            font.weight: 500
+            font.weight: Font.Bold
         }
 
         Item {
@@ -220,6 +229,8 @@ Column {
         }
 
         StyledText {
+            id: limitSuffix
+
             text: "%"
             color: Colours.palette.m3outline
             font.pointSize: Appearance.font.size.bodySmall
