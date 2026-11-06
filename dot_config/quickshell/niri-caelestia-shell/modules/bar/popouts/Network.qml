@@ -33,11 +33,10 @@ ColumnLayout {
         return qsTr("6 GHz");
     }
 
-    spacing: Appearance.spacing.sm
+    spacing: Appearance.spacing.xs
     width: Config.bar.sizes.networkWidth
 
     StyledText {
-        Layout.topMargin: Appearance.padding.md
         Layout.rightMargin: Appearance.padding.xs
         text: qsTr("Wifi %1").arg(Nmcli.wifiEnabled ? "enabled" : "disabled")
         font.weight: 500
@@ -56,7 +55,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.rightMargin: Appearance.padding.xs
         visible: root.activeNetwork !== null
-        implicitHeight: currentRow.implicitHeight + Appearance.padding.md * 2
+        implicitHeight: currentRow.implicitHeight + Appearance.padding.sm * 2
 
         radius: Appearance.rounding.normal
         color: Colours.tPalette.m3surfaceContainerHigh
@@ -65,7 +64,7 @@ ColumnLayout {
             id: currentRow
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.md
+            anchors.margins: Appearance.padding.sm
             spacing: Appearance.spacing.md
 
             MaterialIcon {
@@ -122,7 +121,7 @@ ColumnLayout {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.sm
+        Layout.topMargin: Appearance.spacing.xs
         Layout.rightMargin: Appearance.padding.xs
         visible: Nmcli.wifiEnabled && root.savedNetworks.length > 0
         text: qsTr("Saved")
@@ -137,7 +136,7 @@ ColumnLayout {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.sm
+        Layout.topMargin: Appearance.spacing.xs
         Layout.rightMargin: Appearance.padding.xs
         visible: Nmcli.wifiEnabled && root.availableNetworks.length > 0
         text: qsTr("Available")
@@ -152,7 +151,7 @@ ColumnLayout {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.sm
+        Layout.topMargin: Appearance.spacing.xs
         Layout.rightMargin: Appearance.padding.xs
         visible: Nmcli.wifiEnabled && root.activeNetwork === null && Nmcli.networks.length === 0
         text: Nmcli.scanning ? qsTr("Scanning…") : qsTr("No networks found")
@@ -164,7 +163,7 @@ ColumnLayout {
     // connection is not a second UI to learn. The section is hidden entirely
     // on machines with no wired interface.
     StyledText {
-        Layout.topMargin: Appearance.spacing.md
+        Layout.topMargin: Appearance.spacing.xs
         Layout.rightMargin: Appearance.padding.xs
         visible: Nmcli.ethernetDevices.length > 0
         text: qsTr("Ethernet")
@@ -247,7 +246,8 @@ ColumnLayout {
     }
 
     StyledRect {
-        Layout.topMargin: Appearance.spacing.sm
+        Layout.topMargin: Appearance.spacing.xs
+        Layout.rightMargin: Appearance.padding.xs
         Layout.fillWidth: true
         implicitHeight: rescanBtn.implicitHeight + Appearance.padding.xs * 2
 
