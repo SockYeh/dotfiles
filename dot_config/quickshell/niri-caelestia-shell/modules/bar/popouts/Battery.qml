@@ -11,19 +11,21 @@ import QtQuick.Layouts
 Column {
     id: root
 
-    spacing: Appearance.spacing.lg
+    spacing: Appearance.spacing.xs
     width: Math.max(Config.bar.sizes.batteryWidth, header.implicitWidth)
 
     readonly property bool hasBattery: UPower.displayDevice.isLaptopBattery
+    readonly property int percentage: Math.round(UPower.displayDevice.percentage * 100)
+    readonly property int chargeThreshold: PowerManagement.chargeLimitAvailable ? PowerManagement.chargeLimit : 100
+    readonly property bool atChargeLimit: root.hasBattery && root.percentage >= root.chargeThreshold
     readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state)
-    readonly property string stateLabel: UPower.onBattery ? qsTr("Remaining") : root.charging ? qsTr("Charging") : qsTr("Charged")
-    readonly property string remainingText: root.hasBattery ? qsTr("%1: %2%").arg(root.stateLabel).arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
+    readonly property string stateLabel: UPower.onBattery ? qsTr("Remaining") : root.atChargeLimit ? qsTr("Charged") : qsTr("Charging")
     readonly property string timeText: {
         if (!root.hasBattery)
             return qsTr("Power profile: %1").arg(PowerManagement.platformProfile || qsTr("Unknown"));
         if (UPower.onBattery)
             return root.formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...");
-        if (root.charging)
+        if (!root.atChargeLimit && root.charging)
             return root.formatSeconds(UPower.displayDevice.timeToFull, "Calculating...");
         return "";
     }
@@ -78,11 +80,22 @@ Column {
         id: header
 
         width: parent.width
-        spacing: Appearance.spacing.xs
+        spacing: Appearance.spacing.sm
 
         StyledText {
+            text: root.hasBattery ? root.stateLabel : qsTr("No battery detected")
+            font.weight: 500
+        }
+
+        StyledText {
+            visible: root.hasBattery
+            text: `${root.percentage}%`
+            color: Colours.palette.m3primary
+            font.family: Appearance.font.family.mono
+        }
+
+        Item {
             Layout.fillWidth: true
-            text: root.remainingText
         }
 
         StyledText {
@@ -98,6 +111,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
 
         active: PowerProfiles.degradationReason !== PerformanceDegradationReason.None
+        visible: active
         asynchronous: true
 
         height: active ? (item?.implicitHeight ?? 0) : 0
@@ -219,7 +233,7 @@ Column {
         visible: PowerManagement.profileAvailable
 
         implicitWidth: profileRow.implicitWidth + Appearance.padding.md * 2
-        implicitHeight: profileRow.implicitHeight + Appearance.padding.xs * 2
+        implicitHeight: profileRow.implicitHeight + Appearance.padding.xs
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.full
