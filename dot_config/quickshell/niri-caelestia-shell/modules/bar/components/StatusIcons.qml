@@ -163,7 +163,7 @@ Item {
 
                         MaterialIcon {
                             animate: false
-                            text: "volume_up"
+                            text: Audio.muted ? "volume_off" : "volume_up"
                             color: root.colour
                         }
 
@@ -172,6 +172,11 @@ Item {
                             text: `${Math.round(Audio.volume * 100)}%`
                             color: root.colour
                             font.family: Appearance.font.family.mono
+                        }
+
+                        TapHandler {
+                            acceptedButtons: Qt.MiddleButton
+                            onTapped: Audio.toggleMute()
                         }
                     }
                 }
@@ -220,6 +225,11 @@ Item {
                             text: `${Math.round((root.monitor?.brightness ?? 0.5) * 100)}%`
                             color: root.colour
                             font.family: Appearance.font.family.mono
+                        }
+
+                        TapHandler {
+                            acceptedButtons: Qt.MiddleButton
+                            onTapped: Niri.powerOffMonitors()
                         }
                     }
                 }

@@ -357,6 +357,11 @@ Singleton {
         return NiriIpc.action("do-screen-transition", ["-d", delay.toString()]);
     }
 
+    function powerOffMonitors() {
+        if (!niriAvailable) return false;
+        return NiriIpc.action("power-off-monitors", []);
+    }
+
     function moveColumnToIndex(windowId, index) {
         if (!niriAvailable) return false;
         if (focusWindow(windowId)) {

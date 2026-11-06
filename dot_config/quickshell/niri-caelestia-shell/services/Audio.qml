@@ -47,6 +47,11 @@ Singleton {
         }
     }
 
+    function toggleMute(): void {
+        if (sink?.ready && sink?.audio)
+            sink.audio.muted = !sink.audio.muted;
+    }
+
     function incrementVolume(amount: real): void {
         setVolume(volume + (amount || Config.services.audioIncrement));
     }
