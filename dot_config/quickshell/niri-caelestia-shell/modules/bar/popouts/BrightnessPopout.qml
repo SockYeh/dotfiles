@@ -109,6 +109,7 @@ Item {
         }
 
         RowLayout {
+            Layout.fillWidth: true
             spacing: Appearance.spacing.sm
 
             // Screen timeout on/off, styled like the brightness readout
@@ -117,8 +118,8 @@ Item {
 
                 readonly property bool active: ScreenTimeout.enabled
 
-                implicitWidth: timeoutLabel.implicitWidth + Appearance.padding.sm * 2
-                implicitHeight: timeoutLabel.implicitHeight + Appearance.padding.xs * 2
+                implicitWidth: timeoutLabel.implicitWidth
+                implicitHeight: timeoutLabel.implicitHeight
 
                 radius: Appearance.rounding.small
                 color: "transparent"
@@ -138,8 +139,11 @@ Item {
                     anchors.centerIn: parent
                     text: qsTr("Screen timeout")
                     font.weight: 500
-                    color: timeoutToggle.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
             }
 
             // Timeout length, in seconds
