@@ -38,6 +38,25 @@ charge-limit)
 
     printf '%s\n' "$2" > "$battery/charge_control_end_threshold"
     ;;
+kbd-backlight)
+    [ "$#" -eq 2 ] || exit 2
+    case "$2" in
+    ''|*[!0-9]*) exit 2 ;;
+    esac
+
+    led=
+    for dir in /sys/class/leds/*::kbd_backlight; do
+        [ -e "$dir/brightness" ] || continue
+        led=$dir
+        break
+    done
+    [ -n "$led" ] || exit 3
+
+    max=$(cat "$led/max_brightness")
+    [ "$2" -le "$max" ] || exit 2
+
+    printf '%s\n' "$2" > "$led/brightness"
+    ;;
 *)
     exit 2
     ;;

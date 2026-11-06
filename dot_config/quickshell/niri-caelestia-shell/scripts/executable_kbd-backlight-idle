@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""Turn the Samsung keyboard backlight off after keyboard inactivity.
+
+The samsung-galaxybook driver exposes the backlight as a plain LED and has no
+idle timeout of its own, so this daemon reimplements what Windows does: after a
+period with no key presses the backlight goes dark, and the next key press
+brings it back to whatever level was last used.
+
+Writes need root, so they go through the caelestia-power sudo helper.
+"""
+
+import argparse
+import array
+import fcntl
+import glob
+import os
+import select
+import signal
+import struct
+import subprocess
+import sys
+import time
+
+EV_KEY = 1
+KEY_A = 30
+KEY_PRESS = 1
+KEY_REPEAT = 2
+
+HELPER = "/usr/local/bin/caelestia-power"
+
+# struct input_event: two timevals (long each), __u16 type, __u16 code, __s32 value
+EVENT = struct.Struct("llHHi")
+_EVENT_BYTES = EVENT.size
+
+# _IOC(_IOC_READ, 'E', EVIOCGBIT(EV_KEY) == 0x21, 96)
+EVIOCGBIT_KEY = (2 << 30) | (96 << 16) | (ord("E") << 8) | 0x21
+
+running = True
+
+
+def log(message: str) -> None:
+    print(f"kbd-backlight-idle: {message}", file=sys.stderr, flush=True)
+
+
+def find_led() -> str | None:
+    """Only the built-in Samsung backlight, never an external keyboard's LED."""
+    matches = glob.glob("/sys/class/leds/*::kbd_backlight")
+    for path in matches:
+        if os.path.basename(path).startswith("samsung-galaxybook::"):
+            return path
+    return matches[0] if matches else None
+
+
+def read_level(led: str) -> int | None:
+    try:
+        with open(os.path.join(led, "brightness")) as f:
+            return int(f.read().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def is_keyboard(fd: int) -> bool:
+    """Only count real keyboards, so pointer activity keeps the light off."""
+    try:
+        bits = bytearray(96)
+        fcntl.ioctl(fd, EVIOCGBIT_KEY, bits, True)
+    except OSError:
+        return False
+    return bool(bits[KEY_A // 8] & (1 << (KEY_A % 8)))
+
+
+def set_level(level: int, dry_run: bool) -> bool:
+    if dry_run:
+        log(f"would set backlight to {level}")
+        return True
+
+    try:
+        subprocess.run(
+            ["sudo", "-n", HELPER, "kbd-backlight", str(level)],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    except (OSError, subprocess.CalledProcessError):
+        return False
+
+
+class Devices:
+    """Open every keyboard event device, and pick up hotplugged ones."""
+
+    def __init__(self) -> None:
+        self.fds: dict[int, str] = {}
+
+    def scan(self) -> None:
+        for path in glob.glob("/dev/input/event*"):
+            if path in self.fds.values():
+                continue
+
+            try:
+                fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+            except OSError:
+                continue
+
+            if not is_keyboard(fd):
+                os.close(fd)
+                continue
+
+            self.fds[fd] = path
+
+    def close(self, fd: int) -> None:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        self.fds.pop(fd, None)
+
+    def poll(self) -> list[int]:
+        # An empty set is fine: select then just sleeps for the timeout, which
+        # keeps the hotplug rescan from spinning.
+        try:
+            readable, _, _ = select.select(list(self.fds), [], [], 0.25)
+        except InterruptedError:
+            return []
+
+        return readable
+
+    def read(self, fd: int) -> list[tuple[int, int, int]]:
+        """Return (type, code, value) tuples, dropping the reader on unplug."""
+        try:
+            data = os.read(fd, _EVENT_BYTES * 64)
+        except BlockingIOError:
+            return []
+        except OSError:
+            self.close(fd)
+            return []
+
+        events = []
+        for offset in range(0, len(data) - _EVENT_BYTES + 1, _EVENT_BYTES):
+            _, _, ev_type, code, value = EVENT.unpack_from(data, offset)
+            events.append((ev_type, code, value))
+        return events
+
+
+def on_signal(signum, frame) -> None:
+    global running
+    running = False
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=float(os.environ.get("KBD_BACKLIGHT_TIMEOUT", "15")),
+        help="seconds of keyboard inactivity before the backlight goes off",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="log the changes instead of writing them",
+    )
+    args = parser.parse_args()
+
+    led = find_led()
+    if led is None:
+        log("no samsung ::kbd_backlight LED found")
+        return 1
+
+    signal.signal(signal.SIGTERM, on_signal)
+    signal.signal(signal.SIGINT, on_signal)
+
+    devices = Devices()
+    devices.scan()
+    if not devices.fds:
+        log("no keyboard input devices found")
+
+    last_activity = time.monotonic()
+    last_scan = last_activity
+    last_write_error = 0.0
+    saved_level = 0
+    off_by_us = False
+
+    def write(level: int) -> bool:
+        nonlocal last_write_error
+        if set_level(level, args.dry_run):
+            return True
+        now = time.monotonic()
+        if now - last_write_error > 60:
+            log(
+                "cannot write the backlight level; reinstall the caelestia-power "
+                "helper (sudo install -m755 scripts/caelestia-power "
+                "/usr/local/bin/caelestia-power)"
+            )
+            last_write_error = now
+        return False
+
+    while running:
+        readable = devices.poll()
+        now = time.monotonic()
+
+        for fd in readable:
+            activity = False
+            for ev_type, code, value in devices.read(fd):
+                if ev_type == EV_KEY and value in (KEY_PRESS, KEY_REPEAT):
+                    activity = True
+
+            if not activity:
+                continue
+
+            last_activity = now
+            if not off_by_us:
+                continue
+
+            # A key press woke the keyboard. Only restore if nothing else has
+            # changed the level in the meantime (Fn+F9, ambient light sensor).
+            if read_level(led) == 0 and write(saved_level):
+                log(f"restored backlight level {saved_level}")
+            off_by_us = False
+
+        if now - last_scan > 2:
+            devices.scan()
+            last_scan = now
+
+        if not off_by_us and now - last_activity >= args.timeout:
+            level = read_level(led)
+            if level is not None and level > 0:
+                saved_level = level
+                if write(0):
+                    log(f"backlight off after {args.timeout:g}s idle")
+                    off_by_us = True
+
+            # Either way, wait a full timeout before trying again so a failed
+            # write does not spin.
+            last_activity = now
+
+    if off_by_us:
+        write(saved_level)
+
+    for fd in list(devices.fds):
+        devices.close(fd)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

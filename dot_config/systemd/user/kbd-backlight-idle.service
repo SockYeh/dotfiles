@@ -1,0 +1,12 @@
+[Unit]
+Description=Turn off the Samsung keyboard backlight after keyboard inactivity
+
+[Service]
+Type=simple
+ExecStart=%h/.config/quickshell/niri-caelestia-shell/scripts/kbd-backlight-idle
+Environment=KBD_BACKLIGHT_TIMEOUT=15
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
