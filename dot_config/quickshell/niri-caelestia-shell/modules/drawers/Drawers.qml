@@ -34,7 +34,16 @@ Variants {
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || visibilities.keybinds || visibilities.editingWeatherLocation || visibilities.dashboard || panels.popouts.isDetached ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: {
+                if (visibilities.launcher || visibilities.session || visibilities.keybinds || visibilities.editingWeatherLocation || visibilities.dashboard || panels.popouts.isDetached)
+                    return WlrKeyboardFocus.Exclusive;
+                // Bar popouts contain text fields (brightness timeout, charge
+                // limit). On-demand focus lets them take keyboard input when
+                // clicked without stealing it from the focused window.
+                if (panels.popouts.hasCurrent)
+                    return WlrKeyboardFocus.OnDemand;
+                return WlrKeyboardFocus.None;
+            }
 
             mask: Region {
                 x: Config.border.thickness

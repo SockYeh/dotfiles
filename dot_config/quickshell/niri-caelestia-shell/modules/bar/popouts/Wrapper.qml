@@ -5,7 +5,6 @@ import qs.services
 import qs.config
 import qs.modules.controlcenter
 import Quickshell
-import Quickshell.Wayland
 import QtQuick
 
 Item {
@@ -83,15 +82,8 @@ Item {
         }
     }
 
-    // TODO: Implement focus grab for Niri when available
-
-    Binding {
-        when: root.isDetached || (root.hasCurrent && root.currentName === "wirelesspassword")
-
-        target: QsWindow.window
-        property: "WlrLayershell.keyboardFocus"
-        value: WlrKeyboardFocus.OnDemand
-    }
+    // Focus is requested by the drawer window itself (see Drawers.qml), since
+    // the popout is rendered inside it rather than in a window of its own.
 
     Comp {
         id: content

@@ -67,16 +67,19 @@ Column {
     RowLayout {
         id: header
 
+        width: parent.width
         spacing: Appearance.spacing.xs
 
         StyledText {
+            Layout.fillWidth: true
             text: root.remainingText
         }
 
         StyledText {
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             text: root.timeText
             color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.bodySmall
+            font.pointSize: Appearance.font.size.labelMedium
         }
     }
 
@@ -164,6 +167,13 @@ Column {
             validator: IntValidator {
                 bottom: PowerManagement.minChargeLimit
                 top: PowerManagement.maxChargeLimit
+            }
+
+            onHasFocusChanged: {
+                // The field starts with the current limit; clear it so typing
+                // replaces the value instead of appending an invalid number.
+                if (hasFocus)
+                    text = "";
             }
 
             onEditingFinished: {
