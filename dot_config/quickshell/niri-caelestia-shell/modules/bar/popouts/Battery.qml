@@ -1,39 +1,83 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import Quickshell.Services.UPower
 import QtQuick
+import QtQuick.Layouts
 
 Column {
     id: root
 
     spacing: Appearance.spacing.lg
-    width: Config.bar.sizes.batteryWidth
+    width: Math.max(Config.bar.sizes.batteryWidth, header.implicitWidth)
 
-    StyledText {
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
+    readonly property bool hasBattery: UPower.displayDevice.isLaptopBattery
+    readonly property string remainingText: root.hasBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
+    readonly property string timeText: root.hasBattery ? (UPower.onBattery ? root.formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : root.formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerManagement.platformProfile || qsTr("Unknown"))
+
+    function formatSeconds(s: int, fallback: string): string {
+        const day = Math.floor(s / 86400);
+        const hr = Math.floor(s / 3600) % 60;
+        const min = Math.floor(s / 60) % 60;
+
+        let comps = [];
+        if (day > 0)
+            comps.push(`${day} days`);
+        if (hr > 0)
+            comps.push(`${hr} hours`);
+        if (min > 0)
+            comps.push(`${min} mins`);
+
+        return comps.join(", ") || fallback;
     }
 
-    StyledText {
-        function formatSeconds(s: int, fallback: string): string {
-            const day = Math.floor(s / 86400);
-            const hr = Math.floor(s / 3600) % 60;
-            const min = Math.floor(s / 60) % 60;
+    function profileIcon(profile: string): string {
+        switch (profile) {
+        case "low-power":
+            return "energy_savings_leaf";
+        case "quiet":
+            return "volume_off";
+        case "balanced":
+            return "balance";
+        case "performance":
+            return "rocket_launch";
+        default:
+            return "tune";
+        }
+    }
 
-            let comps = [];
-            if (day > 0)
-                comps.push(`${day} days`);
-            if (hr > 0)
-                comps.push(`${hr} hours`);
-            if (min > 0)
-                comps.push(`${min} mins`);
+    function profileLabel(profile: string): string {
+        switch (profile) {
+        case "low-power":
+            return qsTr("Low power");
+        case "quiet":
+            return qsTr("Quiet");
+        case "balanced":
+            return qsTr("Balanced");
+        case "performance":
+            return qsTr("Performance");
+        default:
+            return profile;
+        }
+    }
 
-            return comps.join(", ") || fallback;
+    RowLayout {
+        id: header
+
+        spacing: Appearance.spacing.xs
+
+        StyledText {
+            text: root.remainingText
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        StyledText {
+            text: root.timeText
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.bodySmall
+        }
     }
 
     Loader {
@@ -95,121 +139,121 @@ Column {
         }
     }
 
+    RowLayout {
+        width: parent.width
+        spacing: Appearance.spacing.sm
+        visible: PowerManagement.chargeLimitAvailable
+
+        StyledText {
+            text: qsTr("Charge limit")
+            font.weight: 500
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        StyledInputField {
+            id: limitInput
+
+            Layout.preferredWidth: 58
+
+            text: `${Math.max(PowerManagement.minChargeLimit, PowerManagement.chargeLimit)}`
+            placeholderText: qsTr("%")
+            horizontalAlignment: TextInput.AlignHCenter
+            validator: IntValidator {
+                bottom: PowerManagement.minChargeLimit
+                top: PowerManagement.maxChargeLimit
+            }
+
+            onEditingFinished: {
+                const val = parseInt(text);
+                if (isNaN(val)) {
+                    text = `${PowerManagement.chargeLimit}`;
+                    return;
+                }
+
+                text = `${Math.max(PowerManagement.minChargeLimit, Math.min(PowerManagement.maxChargeLimit, val))}`;
+                PowerManagement.setChargeLimit(val);
+            }
+        }
+
+        StyledText {
+            text: "%"
+            color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.bodySmall
+        }
+    }
+
     StyledRect {
         id: profiles
 
-        property string current: {
-            const p = PowerProfiles.profile;
-            if (p === PowerProfile.PowerSaver)
-                return saver.icon;
-            if (p === PowerProfile.Performance)
-                return perf.icon;
-            return balance.icon;
-        }
-
         anchors.horizontalCenter: parent.horizontalCenter
+        visible: PowerManagement.profileAvailable
 
-        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Appearance.padding.md * 2 + Appearance.spacing.xxl * 2
-        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Appearance.padding.xs * 2
+        implicitWidth: profileRow.implicitWidth + Appearance.padding.md * 2
+        implicitHeight: profileRow.implicitHeight + Appearance.padding.xs * 2
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.full
 
-        StyledRect {
-            id: indicator
-
-            color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
-            state: profiles.current
-
-            states: [
-                State {
-                    name: saver.icon
-
-                    Fill {
-                        item: saver
-                    }
-                },
-                State {
-                    name: balance.icon
-
-                    Fill {
-                        item: balance
-                    }
-                },
-                State {
-                    name: perf.icon
-
-                    Fill {
-                        item: perf
-                    }
-                }
-            ]
-
-            transitions: Transition {
-                AnchorAnimation {
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-        }
-
-        Profile {
-            id: saver
-
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: Appearance.padding.xs
-
-            profile: PowerProfile.PowerSaver
-            icon: "energy_savings_leaf"
-        }
-
-        Profile {
-            id: balance
+        Row {
+            id: profileRow
 
             anchors.centerIn: parent
 
-            profile: PowerProfile.Balanced
-            icon: "balance"
-        }
+            Repeater {
+                model: PowerManagement.platformProfileChoices
 
-        Profile {
-            id: perf
+                delegate: Profile {
+                    required property string modelData
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: Appearance.padding.xs
-
-            profile: PowerProfile.Performance
-            icon: "rocket_launch"
+                    profile: modelData
+                }
+            }
         }
     }
 
-    component Fill: AnchorChanges {
-        required property Item item
+    Connections {
+        target: PowerManagement
 
-        target: indicator
-        anchors.left: item.left
-        anchors.right: item.right
-        anchors.top: item.top
-        anchors.bottom: item.bottom
+        function onChargeLimitChanged(): void {
+            if (!limitInput.hasFocus)
+                limitInput.text = `${PowerManagement.chargeLimit}`;
+        }
+
+        function onWriteFailed(): void {
+            limitInput.text = `${PowerManagement.chargeLimit}`;
+        }
     }
 
     component Profile: Item {
-        required property string icon
-        required property int profile
+        id: profileItem
+
+        required property string profile
+
+        readonly property bool active: PowerManagement.platformProfile === profileItem.profile
 
         implicitWidth: icon.implicitHeight + Appearance.padding.xs * 2
         implicitHeight: icon.implicitHeight + Appearance.padding.xs * 2
 
+        StyledRect {
+            anchors.fill: parent
+            radius: Appearance.rounding.full
+            color: Colours.palette.m3primary
+            opacity: profileItem.active ? 1 : 0
+
+            Behavior on opacity {
+                Anim {}
+            }
+        }
+
         StateLayer {
             radius: Appearance.rounding.full
-            color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            color: profileItem.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
 
             function onClicked(): void {
-                PowerProfiles.profile = parent.profile;
+                PowerManagement.setPlatformProfile(profileItem.profile);
             }
         }
 
@@ -218,14 +262,25 @@ Column {
 
             anchors.centerIn: parent
 
-            text: parent.icon
+            text: root.profileIcon(profileItem.profile)
             font.pointSize: Appearance.font.size.titleMedium
-            color: profiles.current === text ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-            fill: profiles.current === text ? 1 : 0
+            color: profileItem.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            fill: profileItem.active ? 1 : 0
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Appearance.anim.durations.normal
+                }
+            }
 
             Behavior on fill {
                 Anim {}
             }
+        }
+
+        Tooltip {
+            target: profileItem
+            text: root.profileLabel(profileItem.profile)
         }
     }
 }

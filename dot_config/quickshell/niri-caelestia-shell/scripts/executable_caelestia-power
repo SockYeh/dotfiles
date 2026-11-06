@@ -1,0 +1,44 @@
+#!/bin/sh
+# Privileged helper for the shell's power controls.
+#
+# Installed to /usr/local/bin and allowed via sudoers so the shell can change
+# these sysfs values without prompting. Arguments are validated here because
+# the sudoers rule trusts this program, not its caller.
+set -eu
+
+profile_file=/sys/firmware/acpi/platform_profile
+choices_file=/sys/firmware/acpi/platform_profile_choices
+
+case "${1:-}" in
+platform)
+    [ "$#" -eq 2 ] || exit 2
+    case "$2" in
+    ''|*[!a-z-]*) exit 2 ;;
+    esac
+    case " $(cat "$choices_file") " in
+    *" $2 "*) ;;
+    *) exit 2 ;;
+    esac
+    printf '%s\n' "$2" > "$profile_file"
+    ;;
+charge-limit)
+    [ "$#" -eq 2 ] || exit 2
+    case "$2" in
+    ''|*[!0-9]*) exit 2 ;;
+    esac
+    [ "$2" -ge 50 ] && [ "$2" -le 100 ] || exit 2
+
+    battery=
+    for dir in /sys/class/power_supply/BAT*; do
+        [ -e "$dir/charge_control_end_threshold" ] || continue
+        battery=$dir
+        break
+    done
+    [ -n "$battery" ] || exit 3
+
+    printf '%s\n' "$2" > "$battery/charge_control_end_threshold"
+    ;;
+*)
+    exit 2
+    ;;
+esac
