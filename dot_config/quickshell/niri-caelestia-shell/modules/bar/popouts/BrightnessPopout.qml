@@ -30,36 +30,36 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Appearance.spacing.md
 
-        // Readout — scrolling over it nudges the brightness (replaces the slider)
-        CustomMouseArea {
-            Layout.fillWidth: true
-            implicitWidth: header.implicitWidth
-            implicitHeight: header.implicitHeight
-
-            onWheel: event => {
-                root.apply(root.level + (event.angleDelta.y > 0 ? Config.services.brightnessIncrement : -Config.services.brightnessIncrement));
-            }
-
-            RowLayout {
-                id: header
-
-                spacing: Appearance.spacing.sm
-
-                StyledText {
-                    text: qsTr("Brightness")
-                    font.weight: 500
-                }
-
-                StyledText {
-                    text: `${Math.round(root.level * 100)}%`
-                    color: Colours.palette.m3primary
-                    font.family: Appearance.font.family.mono
-                }
-            }
-        }
-
+        // Readout and display toggle share the top row
         RowLayout {
             spacing: Appearance.spacing.sm
+
+            // Readout — scrolling over it nudges the brightness (replaces the slider)
+            CustomMouseArea {
+                implicitWidth: header.implicitWidth
+                implicitHeight: header.implicitHeight
+
+                onWheel: event => {
+                    root.apply(root.level + (event.angleDelta.y > 0 ? Config.services.brightnessIncrement : -Config.services.brightnessIncrement));
+                }
+
+                RowLayout {
+                    id: header
+
+                    spacing: Appearance.spacing.sm
+
+                    StyledText {
+                        text: qsTr("Brightness")
+                        font.weight: 500
+                    }
+
+                    StyledText {
+                        text: `${Math.round(root.level * 100)}%`
+                        color: Colours.palette.m3primary
+                        font.family: Appearance.font.family.mono
+                    }
+                }
+            }
 
             // Display on/off — coloured while the display is lit, muted once it
             // has been turned off (matches the Screen timeout toggle's pattern)
@@ -106,20 +106,25 @@ Item {
                     }
                 }
             }
+        }
 
-            // Screen timeout on/off
+        RowLayout {
+            spacing: Appearance.spacing.sm
+
+            // Screen timeout on/off, styled like the brightness readout
             StyledRect {
+                id: timeoutToggle
+
                 readonly property bool active: ScreenTimeout.enabled
 
-                implicitWidth: timeoutBtn.implicitWidth + Appearance.padding.sm * 2
-                implicitHeight: timeoutBtn.implicitHeight + Appearance.padding.xs
+                implicitWidth: timeoutLabel.implicitWidth + Appearance.padding.sm * 2
+                implicitHeight: timeoutLabel.implicitHeight + Appearance.padding.xs * 2
 
                 radius: Appearance.rounding.small
-                color: active ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainer
+                color: "transparent"
 
                 StateLayer {
-                    id: timeoutLayer
-                    color: parent.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                    color: Colours.palette.m3onSurface
                     radius: parent.radius
 
                     function onClicked(): void {
@@ -127,25 +132,13 @@ Item {
                     }
                 }
 
-                RowLayout {
-                    id: timeoutBtn
+                StyledText {
+                    id: timeoutLabel
 
                     anchors.centerIn: parent
-                    spacing: Appearance.spacing.xs
-
-                    MaterialIcon {
-                        Layout.leftMargin: Appearance.padding.xs
-                        text: timeoutLayer.color === Colours.palette.m3onPrimaryContainer ? "timer" : "hourglass_bottom"
-                        color: timeoutLayer.color
-                        font.pointSize: Appearance.font.size.bodySmall
-                    }
-
-                    StyledText {
-                        Layout.rightMargin: Appearance.padding.xs
-                        text: qsTr("Screen timeout")
-                        color: timeoutLayer.color
-                        font.pointSize: Appearance.font.size.bodySmall
-                    }
+                    text: qsTr("Screen timeout")
+                    font.weight: 500
+                    color: timeoutToggle.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
                 }
             }
 
