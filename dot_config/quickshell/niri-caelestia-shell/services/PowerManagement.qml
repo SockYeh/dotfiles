@@ -61,6 +61,21 @@ Singleton {
         }
     }
 
+    function profileIcon(profile: string): string {
+        switch (profile) {
+        case "low-power":
+            return "energy_savings_leaf";
+        case "quiet":
+            return "volume_off";
+        case "balanced":
+            return "balance";
+        case "performance":
+            return "rocket_launch";
+        default:
+            return "tune";
+        }
+    }
+
     function setPlatformProfile(profile: string): void {
         if (root.busy || !root.platformProfileChoices.includes(profile) || profile === root.platformProfile)
             return;
@@ -105,7 +120,7 @@ Singleton {
         const value = root.inFlight?.value ?? "";
 
         if (command === "platform")
-            Toaster.toast(qsTr("Power profile changed"), qsTr("Now using %1").arg(root.profileLabel(value)), "tune");
+            Toaster.toast(qsTr("Power profile changed"), qsTr("Now using %1").arg(root.profileLabel(value)), root.profileIcon(value));
         else if (command === "charge-limit")
             Toaster.toast(qsTr("Charge limit changed"), parseInt(value) >= root.maxChargeLimit ? qsTr("Charging to full") : qsTr("Stops charging at %1%").arg(value), "battery_charging_full");
     }

@@ -46,21 +46,6 @@ Column {
         return comps.join(", ") || fallback;
     }
 
-    function profileIcon(profile: string): string {
-        switch (profile) {
-        case "low-power":
-            return "energy_savings_leaf";
-        case "quiet":
-            return "volume_off";
-        case "balanced":
-            return "balance";
-        case "performance":
-            return "rocket_launch";
-        default:
-            return "tune";
-        }
-    }
-
     function profileLabel(profile: string): string {
         switch (profile) {
         case "low-power":
@@ -315,7 +300,7 @@ Column {
 
             anchors.centerIn: parent
 
-            text: root.profileIcon(profileItem.profile)
+            text: PowerManagement.profileIcon(profileItem.profile)
             font.pointSize: Appearance.font.size.titleMedium
             color: profileItem.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
             fill: profileItem.active ? 1 : 0
