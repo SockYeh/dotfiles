@@ -15,8 +15,18 @@ Column {
     width: Math.max(Config.bar.sizes.batteryWidth, header.implicitWidth)
 
     readonly property bool hasBattery: UPower.displayDevice.isLaptopBattery
-    readonly property string remainingText: root.hasBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
-    readonly property string timeText: root.hasBattery ? (UPower.onBattery ? root.formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : root.formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerManagement.platformProfile || qsTr("Unknown"))
+    readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state)
+    readonly property string stateLabel: UPower.onBattery ? qsTr("Remaining") : root.charging ? qsTr("Charging") : qsTr("Charged")
+    readonly property string remainingText: root.hasBattery ? qsTr("%1: %2%").arg(root.stateLabel).arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
+    readonly property string timeText: {
+        if (!root.hasBattery)
+            return qsTr("Power profile: %1").arg(PowerManagement.platformProfile || qsTr("Unknown"));
+        if (UPower.onBattery)
+            return root.formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...");
+        if (root.charging)
+            return root.formatSeconds(UPower.displayDevice.timeToFull, "Calculating...");
+        return "";
+    }
 
     function formatSeconds(s: int, fallback: string): string {
         const day = Math.floor(s / 86400);
@@ -77,6 +87,7 @@ Column {
 
         StyledText {
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            visible: text.length > 0
             text: root.timeText
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.labelMedium
@@ -161,6 +172,7 @@ Column {
 
             Layout.preferredWidth: 58
 
+            enabled: !PowerManagement.busy
             text: `${Math.max(PowerManagement.minChargeLimit, PowerManagement.chargeLimit)}`
             placeholderText: qsTr("%")
             horizontalAlignment: TextInput.AlignHCenter
@@ -177,6 +189,11 @@ Column {
             }
 
             onEditingFinished: {
+                if (PowerManagement.busy) {
+                    text = `${PowerManagement.chargeLimit}`;
+                    return;
+                }
+
                 const val = parseInt(text);
                 if (isNaN(val)) {
                     text = `${PowerManagement.chargeLimit}`;
@@ -261,6 +278,7 @@ Column {
         StateLayer {
             radius: Appearance.rounding.full
             color: profileItem.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            disabled: PowerManagement.busy
 
             function onClicked(): void {
                 PowerManagement.setPlatformProfile(profileItem.profile);

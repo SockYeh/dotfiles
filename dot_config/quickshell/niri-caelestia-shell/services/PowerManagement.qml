@@ -42,36 +42,72 @@ Singleton {
     property string platformProfile: ""
     property list<string> platformProfileChoices: []
     property int chargeLimit: -1
-    property var pendingWrite: null
+    property var inFlight: null
 
     signal writeFailed
 
+    function profileLabel(profile: string): string {
+        switch (profile) {
+        case "low-power":
+            return qsTr("Low power");
+        case "quiet":
+            return qsTr("Quiet");
+        case "balanced":
+            return qsTr("Balanced");
+        case "performance":
+            return qsTr("Performance");
+        default:
+            return profile;
+        }
+    }
+
     function setPlatformProfile(profile: string): void {
-        if (!root.platformProfileChoices.includes(profile) || profile === root.platformProfile)
+        if (root.busy || !root.platformProfileChoices.includes(profile) || profile === root.platformProfile)
             return;
-        root.writeValue("platform", profile);
+
+        // Move the indicator immediately; the file watcher confirms it later.
+        const previous = root.platformProfile;
+        root.platformProfile = profile;
+        root.writeValue("platform", profile, previous);
     }
 
     function setChargeLimit(limit: int): void {
-        if (!root.chargeLimitAvailable)
+        if (root.busy || !root.chargeLimitAvailable)
             return;
 
         const clamped = Math.max(root.minChargeLimit, Math.min(root.maxChargeLimit, Math.round(limit)));
         if (clamped === root.chargeLimit)
             return;
 
-        root.writeValue("charge-limit", String(clamped));
+        // Show the new limit right away instead of waiting for the sysfs watcher.
+        const previous = root.chargeLimit;
+        root.chargeLimit = clamped;
+        root.writeValue("charge-limit", String(clamped), previous);
     }
 
-    function writeValue(command: string, value: string): void {
-        if (writeProc.running) {
-            root.pendingWrite = [command, value];
+    function writeValue(command: string, value: string, previous: var): void {
+        if (writeProc.running)
             return;
-        }
+
+        root.inFlight = {
+            command,
+            value,
+            previous
+        };
 
         // The helper validates both the command and its value itself, so a
         // passwordless sudo rule cannot be used to write arbitrary files.
         writeProc.exec(["/usr/bin/sudo", "-n", root.helperPath, command, value]);
+    }
+
+    function notifySuccess(): void {
+        const command = root.inFlight?.command ?? "";
+        const value = root.inFlight?.value ?? "";
+
+        if (command === "platform")
+            Toaster.toast(qsTr("Power profile changed"), qsTr("Now using %1").arg(root.profileLabel(value)), "tune");
+        else if (command === "charge-limit")
+            Toaster.toast(qsTr("Charge limit changed"), parseInt(value) >= root.maxChargeLimit ? qsTr("Charging to full") : qsTr("Stops charging at %1%").arg(value), "battery_charging_full");
     }
 
     FileView {
@@ -81,7 +117,10 @@ Singleton {
         watchChanges: true
 
         onFileChanged: reload()
-        onLoaded: root.platformProfile = text().trim()
+        onLoaded: {
+            if (!root.busy)
+                root.platformProfile = text().trim();
+        }
     }
 
     FileView {
@@ -100,6 +139,9 @@ Singleton {
 
         onFileChanged: reload()
         onLoaded: {
+            if (root.busy)
+                return;
+
             const value = parseInt(text().trim(), 10);
             root.chargeLimit = Number.isNaN(value) ? -1 : value;
         }
@@ -115,24 +157,27 @@ Singleton {
         }
 
         onExited: (code, status) => {
-            if (code !== 0) {
+            if (code === 0) {
+                root.notifySuccess();
+            } else {
                 const raw = writeProc.errorText.trim();
                 const message = raw.includes("password") ? qsTr("The power helper is not set up yet") : (raw || qsTr("Could not apply the setting"));
                 console.warn("[PowerManagement] write failed:", code, raw);
+
+                // Put the UI back to the value that was actually on disk.
+                if (root.inFlight?.command === "platform")
+                    root.platformProfile = root.inFlight.previous;
+                else if (root.inFlight?.command === "charge-limit")
+                    root.chargeLimit = root.inFlight.previous;
+
                 Toaster.toast(qsTr("Power setting not changed"), message, "error", Toast.Error);
-                root.pendingWrite = null;
                 root.writeFailed();
             }
 
+            root.inFlight = null;
             writeProc.errorText = "";
             profileView.reload();
             limitView.reload();
-
-            if (root.pendingWrite) {
-                const next = root.pendingWrite;
-                root.pendingWrite = null;
-                root.writeValue(next[0], next[1]);
-            }
         }
     }
 }
